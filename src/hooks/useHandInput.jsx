@@ -12,7 +12,6 @@ export function useHandInput(onUpdate) {
   useEffect(() => {
     let handLandmarker;
     let video;
-
     // persistent state
     let smoothX = 0.5;
     let smoothY = 0.5;
@@ -63,7 +62,6 @@ export function useHandInput(onUpdate) {
             }
           } else {
             lastSeen = performance.now();
-            totalFrames++;
 
             const lm = result.landmarks[0];
 
@@ -98,25 +96,12 @@ export function useHandInput(onUpdate) {
             if (fireGesture) fireState = true;
             if (aimGesture) fireState = false;
 
-            
-
-            const aimAccuracy =
-              totalFrames > 0 ? aimFrames / totalFrames : 0;
-
-            const fireAccuracy =
-              totalFrames > 0 ? fireFrames / totalFrames : 0;
-
+          
             onUpdate({
               active: true,
               x: smoothX,
               y: smoothY,
               fire: fireState,
-
-              accuracy: {
-                aim: aimAccuracy,
-                fire: fireAccuracy,
-              },
-
               landmarks: lm.map(p => ({
                 x: p.x,
                 y: p.y,
