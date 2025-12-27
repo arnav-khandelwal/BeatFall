@@ -15,24 +15,24 @@ export default function App() {
         fire={hand.fire}
       />
 
-      <div
-        style={{
-          position: "fixed",
-          top: 10,
-          left: 10,
-          color: "rgba(17, 152, 206, 1)",
-          fontFamily: "monospace",
-          zIndex: 20,
-        }}
-      >
+      {/* DEBUG */}
+      <div style={{ position: "fixed", top: 10, left: 10, color: "#0af" }}>
         {!hand.active && <div>Hand not detected</div>}
         {hand.active && (
           <>
             <div>Aim: {hand.aim ? "YES" : "NO"}</div>
-            <div>Fire: {hand.fire ? " YES" : "NO"}</div>
+            <div>Fire: {hand.fire ? "YES" : "NO"}</div>
           </>
         )}
       </div>
+
+      {/* DEPTH WARNINGS */}
+      {hand.depthError === "TOO_CLOSE" && (
+        <div style={{ color: "red" }}>✋ Move hand away</div>
+      )}
+      {hand.depthError === "TOO_FAR" && (
+        <div style={{ color: "orange" }}>✋ Move hand closer</div>
+      )}
     </>
   );
 }

@@ -4,13 +4,8 @@ import {
   FilesetResolver,
 } from "@mediapipe/tasks-vision";
 
-
 function dist3(a, b) {
   return Math.hypot(a.x - b.x, a.y - b.y, a.z - b.z);
-}
-
-function dist2(a, b) {
-  return Math.hypot(a.x - b.x, a.y - b.y);
 }
 
 function isFingerExtended(lm, tip, pip) {
@@ -56,25 +51,6 @@ export function useHandInput(onUpdate) {
         runningMode: "VIDEO",
         numHands: 1,
       });
-      const lm = result.landmarks[0];
-
-      const palmWidth = dist2(lm[5], lm[17]);
-      const handTooFar = palmWidth < 0.05;
-        const handTooClose = palmWidth > 0.25;
-
-        if (handTooFar || handTooClose) {
-          onUpdate({
-            active: true,
-            aim: false,
-            fire: false,
-            depthError: handTooFar ? "TOO_FAR" : "TOO_CLOSE",
-            x: smoothX,
-            y: smoothY,
-            landmarks: lm,
-          });
-          requestAnimationFrame(loop);
-          return;
-        }
       function loop() {
         if (video.readyState < 2) {
           requestAnimationFrame(loop);
@@ -108,7 +84,7 @@ const aimGesture = indexExt && middleExt;
 
 const handScale = dist3(lm[0], lm[9]); 
 
-const thumbPoints = [ 3, 4];
+const thumbPoints = [2,3, 4];
 const indexPoints = [5, 6, 8];
 
 let minPinchDist = Infinity;
@@ -127,7 +103,9 @@ const palmVec = {
         };
 
         const verticalHand =
-          Math.abs(palmVec.z) > Math.abs(palmVec.x);
+  Math.abs(palmVec.z) >
+  1.2 * Math.max(Math.abs(palmVec.x), Math.abs(palmVec.y));
+
 
 const indexDir = {
           x: lm[8].x - lm[5].x,
@@ -156,8 +134,8 @@ const indexDir = {
 const fire =
           aimGesture &&
           (
-            (!verticalHand && dist3(lm[4], lm[8]) < 0.16) ||
-            (verticalHand && thumbTowardsIndex)
+            (verticalHand && (dist3(lm[4], lm[8]) < 0.18)) ||
+            (!verticalHand && thumbTowardsIndex )
           );  
 
 fireState = fire; 
@@ -191,4 +169,4 @@ fireState = fire;
       video?.parentNode?.removeChild(video);
     };
   }, []);
-}
+} 
