@@ -1,20 +1,23 @@
 import { useState, useRef, useCallback } from "react";
+import { IoMusicalNotes, IoStop } from "react-icons/io5";
 import { useHandInput } from "./hooks/useHandInput";
 import { useAudioAnalyzer } from "./hooks/useAudioAnalyzer";
 import { useEnemies } from "./hooks/useEnemies";
 import HandCanvas from "./components/HandCanvas";
 import WaveCanvas from "./components/WaveCanvas";
 import EnemyRenderer from "./components/EnemyRenderer";
-import blackoutAudio from "./assets/audio/blackout.mp3";
+import SongSelector from "./components/UI/SongSelector";
 
 export default function App() {
   const [hand, setHand] = useState({ active: false });
+  const [showSongSelector, setShowSongSelector] = useState(false);
+  const [selectedSong, setSelectedSong] = useState(null);
   const pulsesRef = useRef([]);
 
   useHandInput(setHand);
 
-  // Audio system using local blackout.mp3 file
-  const audio = useAudioAnalyzer(blackoutAudio);
+  // Audio system - only initialize when song is selected
+  const audio = useAudioAnalyzer(selectedSong?.audioUrl || null);
   
   // Callback to trigger strong pulse on enemy spawn
   const handleEnemySpawn = useCallback((spawnY) => {
@@ -34,9 +37,31 @@ export default function App() {
   
   // Enemy spawning system with strong pulse callback
   const { enemies } = useEnemies(audio.beatDetected, audio.isPlaying, handleEnemySpawn);
+  
+  const handleSongSelect = (song) => {
+    setSelectedSong(song);
+    setShowSongSelector(false);
+    // Auto-play the selected song
+    setTimeout(() => {
+      audio.play();
+    }, 100);
+  };
+
+  const handleStop = () => {
+    audio.pause();
+    setSelectedSong(null);
+  };
 
   return (
     <>
+      {/* Song Selection Modal */}
+      {showSongSelector && (
+        <SongSelector
+          onSongSelect={handleSongSelect}
+          onClose={() => setShowSongSelector(false)}
+        />
+      )}
+
       {/* Wave visualization (behind everything) */}
       <WaveCanvas
         currentAmplitude={audio.currentAmplitude}
@@ -55,58 +80,130 @@ export default function App() {
         fire={hand.fire}
       />
 
-      {/* Audio controls */}
-      <div style={{ position: "fixed", top: 10, right: 10, zIndex: 100 }}>
+      {/* Music Selection Button */}
+      <div style={{ position: "fixed", top: 10, right: 10, zIndex: 100, display: "flex", flexDirection: "column", gap: "10px" }}>
         <button
-          onClick={audio.isPlaying ? audio.pause : audio.play}
+          onClick={() => setShowSongSelector(true)}
           style={{
-            padding: "10px 20px",
-            fontSize: "16px",
-            background: audio.isPlaying ? "#f00" : "#0f0",
-            color: "#000",
-            border: "2px solid #fff",
-            borderRadius: "5px",
+            padding: "12px 18px",
+            fontSize: "24px",
+            background: "rgba(196, 30, 58, 0.12)",
+            color: "#c41e3a",
+            border: "2px solid #c41e3a",
+            borderRadius: "12px",
             cursor: "pointer",
             fontWeight: "bold",
-            boxShadow: "0 0 20px rgba(0, 255, 255, 0.5)",
+            boxShadow: "0 4px 12px rgba(196, 30, 58, 0.15)",
+            transition: "all 0.3s ease",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "#c41e3a";
+            e.currentTarget.style.color = "#fff";
+            e.currentTarget.style.transform = "translateY(-2px)";
+            e.currentTarget.style.boxShadow = "0 6px 20px rgba(196, 30, 58, 0.25)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "rgba(196, 30, 58, 0.12)";
+            e.currentTarget.style.color = "#c41e3a";
+            e.currentTarget.style.transform = "translateY(0)";
+            e.currentTarget.style.boxShadow = "0 4px 12px rgba(196, 30, 58, 0.15)";
           }}
         >
-          {audio.isPlaying ? "⏸ Pause" : "▶ Play"}
+          <IoMusicalNotes />
         </button>
+        
+        {/* Stop button - only show when song is selected */}
+        {selectedSong && (
+          <button
+            onClick={handleStop}
+            style={{
+              padding: "10px 16px",
+              fontSize: "20px",
+              background: "rgba(22, 91, 51, 0.12)",
+              color: "#165b33",
+              border: "2px solid #165b33",
+              borderRadius: "10px",
+              cursor: "pointer",
+              fontWeight: "bold",
+              boxShadow: "0 4px 12px rgba(22, 91, 51, 0.15)",
+              transition: "all 0.3s ease",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              gap: "6px",
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.background = "#165b33";
+              e.currentTarget.style.color = "#fff";
+              e.currentTarget.style.boxShadow = "0 6px 20px rgba(22, 91, 51, 0.25)";
+              e.currentTarget.style.transform = "translateY(-2px)";
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.background = "rgba(22, 91, 51, 0.12)";
+              e.currentTarget.style.color = "#165b33";
+              e.currentTarget.style.boxShadow = "0 4px 12px rgba(22, 91, 51, 0.15)";
+              e.currentTarget.style.transform = "translateY(0)";
+            }}
+          >
+            <IoStop />
+          </button>
+        )}
       </div>
 
       {/* Audio debug info */}
-      <div style={{ 
-        position: "fixed", 
-        top: 60, 
-        right: 10, 
-        color: "#0af",
-        fontSize: "12px",
-        background: "rgba(0, 0, 0, 0.7)",
-        padding: "10px",
-        borderRadius: "5px",
-        zIndex: 100,
-      }}>
-        {!audio.isCalibrated && audio.isPlaying && (
-          <div>🎵 Calibrating... {Math.floor(audio.calibrationProgress * 100)}%</div>
-        )}
-        {audio.isCalibrated && (
-          <>
-            <div>Amplitude: {audio.currentAmplitude.toFixed(1)}</div>
-            <div>Baseline: {audio.averageAmplitude.toFixed(1)}</div>
-            <div>Enemies: {enemies.length}</div>
-            <div>Beat: {audio.beatDetected ? "💥" : "—"}</div>
-          </>
-        )}
-      </div>
+      {selectedSong && (
+        <div style={{ 
+          position: "fixed", 
+          top: 130, 
+          right: 10, 
+          color: "#1a1a1a",
+          fontSize: "12px",
+          background: "rgba(255, 255, 255, 0.92)",
+          padding: "12px 14px",
+          borderRadius: "10px",
+          border: "2px solid #c41e3a",
+          zIndex: 100,
+          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+        }}>
+          <div style={{ fontWeight: "bold", marginBottom: "5px", color: "#c41e3a" }}>
+            {selectedSong.title}
+          </div>
+          {!audio.isCalibrated && audio.isPlaying && (
+            <div>Calibrating... {Math.floor(audio.calibrationProgress * 100)}%</div>
+          )}
+          {audio.isCalibrated && (
+            <>
+              <div>Amplitude: {audio.currentAmplitude.toFixed(1)}</div>
+              <div>Baseline: {audio.averageAmplitude.toFixed(1)}</div>
+              <div>Enemies: {enemies.length}</div>
+              <div>Beat: {audio.beatDetected ? "💥" : "—"}</div>
+            </>
+          )}
+        </div>
+      )}
 
       {/* Hand tracking debug */}
-      <div style={{ position: "fixed", top: 10, left: 10, color: "#0af", zIndex: 100 }}>
+      <div style={{ 
+        position: "fixed", 
+        top: 10, 
+        left: 10, 
+        color: "#1a1a1a",
+        background: "rgba(255, 255, 255, 0.92)",
+        padding: "10px 12px",
+        borderRadius: "8px",
+        border: "2px solid #165b33",
+        fontSize: "13px",
+        zIndex: 100,
+        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
+      }}>
         {!hand.active && <div>Hand not detected</div>}
         {hand.active && (
           <>
-            <div>Aim: {hand.aim ? "YES" : "NO"}</div>
-            <div>Fire: {hand.fire ? "YES" : "NO"}</div>
+            <div style={{ fontWeight: 600, color: "#165b33" }}>Aim: {hand.aim ? "YES" : "NO"}</div>
+            <div style={{ fontWeight: 600, color: "#165b33" }}>Fire: {hand.fire ? "YES" : "NO"}</div>
           </>
         )}
       </div>

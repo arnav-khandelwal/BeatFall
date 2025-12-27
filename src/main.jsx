@@ -9,7 +9,7 @@ createRoot(document.getElementById('root')).render(
   <StrictMode>
     <App /> 
     {/* to display landing page uncomment the line below  */}
-    <LandingPage />
+    {/* <LandingPage /> */}
 
   </StrictMode>,
 )
