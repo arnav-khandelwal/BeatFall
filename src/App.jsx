@@ -7,22 +7,26 @@ import HandCanvas from "./components/HandCanvas";
 import WaveCanvas from "./components/WaveCanvas";
 import EnemyRenderer from "./components/EnemyRenderer";
 import SongSelector from "./components/UI/SongSelector";
+import World from "./world/World";
+import ScopeOverlay from "./components/UI/ScopeOverlay";
+import "./components/UI/ScopeOverlay.css";
 
 export default function App() {
   const [hand, setHand] = useState({ active: false });
   const [showSongSelector, setShowSongSelector] = useState(false);
   const [selectedSong, setSelectedSong] = useState(null);
+
   const pulsesRef = useRef([]);
 
   useHandInput(setHand);
 
   // Audio system - only initialize when song is selected
   const audio = useAudioAnalyzer(selectedSong?.audioUrl || null);
-  
+
   // Callback to trigger strong pulse on enemy spawn
   const handleEnemySpawn = useCallback((spawnY) => {
     const NEON_COLORS = [0, 120, 180, 240, 300, 45];
-    
+
     pulsesRef.current.push({
       x: 0,
       radius: 0,
@@ -34,10 +38,10 @@ export default function App() {
       spawnY: spawnY, // Store spawn Y position for glow effect
     });
   }, []);
-  
+
   // Enemy spawning system with strong pulse callback
   const { enemies } = useEnemies(audio.beatDetected, audio.isPlaying, handleEnemySpawn);
-  
+
   const handleSongSelect = (song) => {
     setSelectedSong(song);
     setShowSongSelector(false);
@@ -74,14 +78,25 @@ export default function App() {
       <EnemyRenderer enemies={enemies} />
 
       {/* Hand tracking overlay */}
+      <World hand={hand} />
+
       <HandCanvas
         landmarks={hand.landmarks}
         aim={hand.aim}
         fire={hand.fire}
       />
 
-      {/* Music Selection Button */}
-      <div style={{ position: "fixed", top: 10, right: 10, zIndex: 100, display: "flex", flexDirection: "column", gap: "10px" }}>
+      <ScopeOverlay visible={hand.aim} />
+      {/* Top-right Controls */}
+      <div style={{ 
+        position: "fixed", 
+        top: 10, 
+        right: 10, 
+        zIndex: 100, 
+        display: "flex", 
+        flexDirection: "column", 
+        gap: "10px" 
+      }}>
         <button
           onClick={() => setShowSongSelector(true)}
           style={{
@@ -114,7 +129,7 @@ export default function App() {
         >
           <IoMusicalNotes />
         </button>
-        
+
         {/* Stop button - only show when song is selected */}
         {selectedSong && (
           <button
@@ -155,10 +170,10 @@ export default function App() {
 
       {/* Audio debug info */}
       {selectedSong && (
-        <div style={{ 
-          position: "fixed", 
-          top: 130, 
-          right: 10, 
+        <div style={{
+          position: "fixed",
+          top: 130,
+          right: 10,
           color: "#1a1a1a",
           fontSize: "12px",
           background: "rgba(255, 255, 255, 0.92)",
@@ -185,11 +200,11 @@ export default function App() {
         </div>
       )}
 
-      {/* Hand tracking debug */}
-      <div style={{ 
-        position: "fixed", 
-        top: 10, 
-        left: 10, 
+      {/* Hand tracking debug info */}
+      <div style={{
+        position: "fixed",
+        top: 10,
+        left: 10,
         color: "#1a1a1a",
         background: "rgba(255, 255, 255, 0.92)",
         padding: "10px 12px",
@@ -207,38 +222,6 @@ export default function App() {
           </>
         )}
       </div>
-
-      {/* DEPTH WARNINGS */}
-      {hand.depthError === "TOO_CLOSE" && (
-        <div style={{ 
-          position: "fixed",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          color: "red",
-          fontSize: "32px",
-          fontWeight: "bold",
-          textShadow: "0 0 20px rgba(255, 0, 0, 0.8)",
-          zIndex: 100,
-        }}>
-          ✋ Move hand away
-        </div>
-      )}
-      {hand.depthError === "TOO_FAR" && (
-        <div style={{ 
-          position: "fixed",
-          top: "50%",
-          left: "50%",
-          transform: "translate(-50%, -50%)",
-          color: "orange",
-          fontSize: "32px",
-          fontWeight: "bold",
-          textShadow: "0 0 20px rgba(255, 165, 0, 0.8)",
-          zIndex: 100,
-        }}>
-          ✋ Move hand closer
-        </div>
-      )}
     </>
   );
 }
