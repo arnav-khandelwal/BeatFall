@@ -17,7 +17,7 @@ export default function App() {
   const audio = useAudioAnalyzer(blackoutAudio);
   
   // Callback to trigger strong pulse on enemy spawn
-  const handleEnemySpawn = useCallback(() => {
+  const handleEnemySpawn = useCallback((spawnY) => {
     const NEON_COLORS = [0, 120, 180, 240, 300, 45];
     
     pulsesRef.current.push({
@@ -28,6 +28,7 @@ export default function App() {
       opacity: 1,
       amplitude: 80 + Math.random() * 40,
       rippleCount: 3, // More ripples for strong pulse
+      spawnY: spawnY, // Store spawn Y position for glow effect
     });
   }, []);
   

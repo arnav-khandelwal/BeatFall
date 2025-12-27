@@ -31,9 +31,9 @@ export function useEnemies(beatDetected, isPlaying, onEnemySpawn) {
       
       setEnemies(prev => [...prev, newEnemy]);
       
-      // Trigger strong pulse on enemy spawn
+      // Trigger strong pulse on enemy spawn with Y position
       if (onEnemySpawn) {
-        onEnemySpawn();
+        onEnemySpawn(randomY);
       }
     }
   }, [beatDetected, isPlaying, onEnemySpawn]);

@@ -20,7 +20,7 @@ export default function WaveCanvas({
   const BAR_COUNT = 64; // Number of sound bars
   const BAR_GAP = 4; // Gap between bars
   const BAR_BASE_HEIGHT = 5; // Minimum bar height
-  const BAR_MAX_HEIGHT = 150; // Maximum bar height
+  const BAR_MAX_HEIGHT = 80; // Maximum bar height
 
   // Neon Christmas colors (HSL hue values)
   const NEON_COLORS = [0, 120, 180, 240, 300, 45]; // red, green, cyan, blue, magenta, gold
@@ -61,13 +61,27 @@ export default function WaveCanvas({
       // Draw sound bars at bottom
       drawSoundBars(ctx, canvas.width, canvas.height, hue);
 
-      // Draw and update glow effects
+      // Draw and update pop animations
       glowsRef.current = glowsRef.current.filter(glow => {
-        glow.opacity -= 0.015; // Fade out over ~300ms at 60fps
-        
-        if (glow.opacity <= 0) return false;
+        // Advance animation progress (0 -> 1)
+        glow.age += 0.05; // Slightly slower for a smoother pop
 
-        drawLeftGlow(ctx, canvas.height, glow);
+        // Clamp age to [0, 1]
+        const t = Math.min(glow.age, 1);
+
+        // Ease-out for radius so it starts fast and settles smoothly
+        const easeOutCubic = (x) => 1 - Math.pow(1 - x, 3);
+        const eased = easeOutCubic(t);
+
+        // Radius grows from 0 to maxRadius with easing
+        glow.radius = glow.maxRadius * eased;
+
+        // Opacity fades out linearly over the lifetime
+        glow.opacity = 1 - t;
+        
+        if (t >= 1) return false; // Animation complete
+
+        drawPopAnimation(ctx, glow);
         return true;
       });
 
@@ -82,40 +96,31 @@ export default function WaveCanvas({
     };
   }, [isPlaying, currentAmplitude]);
 
-  // Trigger glow effect on beat/spawn (using pulsesRef as communication channel)
-  useEffect(() => {
-    if (beatDetected && isPlaying) {
-      const now = Date.now();
-      if (now - lastBeatTimeRef.current < 100) return;
-      lastBeatTimeRef.current = now;
-
-      // Add soft glow for regular beats
-      glowsRef.current.push({
-        opacity: 0.6,
-        strength: 1, // Soft glow
-        color: NEON_COLORS[Math.floor(Math.random() * NEON_COLORS.length)],
-        width: 80,
-      });
-    }
-  }, [beatDetected, isPlaying]);
+  // Regular beats no longer trigger glow - only enemy spawns create portal effect
 
   // Listen for strong pulses (enemy spawns) via pulsesRef
   useEffect(() => {
     if (!pulsesRef || !pulsesRef.current) return;
 
     const interval = setInterval(() => {
-      // Check if new strong pulses were added
-      const strongPulses = pulsesRef.current.filter(p => p.strength === 2 && p.radius < 10);
-      
-      if (strongPulses.length > 0) {
-        // Add strong glow for enemy spawn
+      // Check if new strong pulses were added and not yet used for glow
+      const strongPulses = pulsesRef.current.filter(
+        p => p.strength === 2 && !p.usedForGlow
+      );
+
+      strongPulses.forEach(pulse => {
+        pulse.usedForGlow = true; // Mark so we only pop once per spawn
+
+        // Add a small, elegant pop at spawn position
         glowsRef.current.push({
           opacity: 1,
-          strength: 2, // Strong glow
-          color: NEON_COLORS[Math.floor(Math.random() * NEON_COLORS.length)],
-          width: 150,
+          color: pulse.color || NEON_COLORS[Math.floor(Math.random() * NEON_COLORS.length)],
+          spawnY: pulse.spawnY || window.innerHeight / 2,
+          radius: 0, // Start at 0 and expand
+          maxRadius: 40, // Small radius for subtle effect
+          age: 0, // Animation progress 0 -> 1
         });
-      }
+      });
     }, 50);
 
     return () => clearInterval(interval);
@@ -160,30 +165,31 @@ export default function WaveCanvas({
     }
   };
 
-  /**
-   * Draw glow effect from left edge
-   */
-  const drawLeftGlow = (ctx, height, glow) => {
-    const gradient = ctx.createLinearGradient(0, 0, glow.width, 0);
-    
-    // Brightness based on strength
-    const lightness = glow.strength === 2 ? 70 : 60;
+  const drawPopAnimation = (ctx, glow) => {
+    const centerX = 0; // On the left edge
+    const centerY = glow.spawnY;
     const alpha = glow.opacity;
+    const radius = glow.radius;
     
-    gradient.addColorStop(0, `hsla(${glow.color}, 100%, ${lightness}%, ${alpha})`);
-    gradient.addColorStop(0.5, `hsla(${glow.color}, 100%, ${lightness}%, ${alpha * 0.5})`);
-    gradient.addColorStop(1, `hsla(${glow.color}, 100%, ${lightness}%, 0)`);
+    // Half-sphere fill (only inside the play area, to the right)
+    // Use a true radial gradient centered on the spawn point
+    const gradient = ctx.createRadialGradient(
+      centerX, centerY, 0,
+      centerX, centerY, radius
+    );
+    gradient.addColorStop(0, `hsla(${glow.color}, 100%, 80%, ${alpha * 0.7})`);
+    gradient.addColorStop(1, `hsla(${glow.color}, 100%, 60%, 0)`);
     
     ctx.fillStyle = gradient;
-    ctx.fillRect(0, 0, glow.width, height);
+    ctx.shadowBlur = 12;
+    ctx.beginPath();
+    // Draw a right-facing half-circle (from top to bottom)
+    ctx.arc(centerX, centerY, radius, -Math.PI / 2, Math.PI / 2);
+    ctx.lineTo(centerX, centerY);
+    ctx.closePath();
+    ctx.fill();
     
-    // Add extra glow for strong spawns
-    if (glow.strength === 2) {
-      ctx.shadowBlur = 40;
-      ctx.shadowColor = `hsla(${glow.color}, 100%, 70%, ${alpha * 0.8})`;
-      ctx.fillRect(0, 0, glow.width, height);
-      ctx.shadowBlur = 0;
-    }
+    ctx.shadowBlur = 0;
   };
 
   return (
