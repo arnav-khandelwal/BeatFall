@@ -8,6 +8,7 @@ import WaveCanvas from "./components/WaveCanvas";
 import SongSelector from "./components/UI/SongSelector";
 import World from "./world/World";
 import ScopeOverlay from "./components/UI/ScopeOverlay";
+import Minimap from "./components/UI/Minimap";
 import "./components/UI/ScopeOverlay.css";
 
 export default function App() {
@@ -196,28 +197,8 @@ export default function App() {
         </div>
       )}
 
-      {/* Hand tracking debug info */}
-      <div style={{
-        position: "fixed",
-        top: 10,
-        left: 10,
-        color: "#1a1a1a",
-        background: "rgba(255, 255, 255, 0.92)",
-        padding: "10px 12px",
-        borderRadius: "8px",
-        border: "2px solid #165b33",
-        fontSize: "13px",
-        zIndex: 100,
-        boxShadow: "0 4px 12px rgba(0, 0, 0, 0.08)",
-      }}>
-        {!hand.active && <div>Hand not detected</div>}
-        {hand.active && (
-          <>
-            <div style={{ fontWeight: 600, color: "#165b33" }}>Aim: {hand.aim ? "YES" : "NO"}</div>
-            <div style={{ fontWeight: 600, color: "#165b33" }}>Fire: {hand.fire ? "YES" : "NO"}</div>
-          </>
-        )}
-      </div>
+      {/* Minimap */}
+      <Minimap enemies={enemies} hand={hand} />
     </>
   );
 }
