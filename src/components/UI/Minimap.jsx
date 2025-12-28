@@ -76,8 +76,8 @@ export default function Minimap({ enemies, hand }) {
 
     // Draw direction arrow
     if (hand?.active) {
-      const angle = (hand.x - 0.5) * Math.PI * 2; // Same calculation as CameraRig
-      const arrowLength = 25;
+      const angle = (hand.x - 0.5) * Math.PI * 5; // Match CameraRig calculation
+      const arrowLength = 15;
       const arrowX = centerX + Math.sin(angle) * arrowLength;
       const arrowY = centerY - Math.cos(angle) * arrowLength;
 
