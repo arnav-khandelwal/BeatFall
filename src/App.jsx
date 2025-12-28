@@ -5,7 +5,6 @@ import { useAudioAnalyzer } from "./hooks/useAudioAnalyzer";
 import { useEnemies } from "./hooks/useEnemies";
 import HandCanvas from "./components/HandCanvas";
 import WaveCanvas from "./components/WaveCanvas";
-import EnemyRenderer from "./components/EnemyRenderer";
 import SongSelector from "./components/UI/SongSelector";
 import World from "./world/World";
 import ScopeOverlay from "./components/UI/ScopeOverlay";
@@ -74,11 +73,8 @@ export default function App() {
         pulsesRef={pulsesRef}
       />
 
-      {/* Enemies */}
-      <EnemyRenderer enemies={enemies} />
-
-      {/* Hand tracking overlay */}
-      <World hand={hand} />
+      {/* 3D World with enemies and hand tracking */}
+      <World hand={hand} enemies={enemies} />
 
       <HandCanvas
         landmarks={hand.landmarks}
