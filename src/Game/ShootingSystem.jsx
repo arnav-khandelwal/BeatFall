@@ -1,31 +1,27 @@
-import * as THREE from "three";
 import { useRef, useState } from "react";
-import { useFrame, useThree } from "@react-three/fiber";
-import MuzzleFlash from "./MuzzleFlash";
+import { useFrame } from "@react-three/fiber";
+import LaserBolt from "./LaserBolt";
 
 export default function ShootingSystem({ hand, setScore }) {
-  const { camera, scene } = useThree();
-  const [flash, setFlash] = useState(false);
-
-  const raycaster = useRef(new THREE.Raycaster());
+  const [lasers, setLasers] = useState([]);
   const lastShot = useRef(0);
 
-  const FIRE_RATE = 200; 
+  const FIRE_RATE = 200; // ms
 
-  function shoot() {
-    raycaster.current.setFromCamera({ x: 0, y: 0 }, camera);
+  // fire control (machine gun)
+  useFrame(() => {
+    if (!hand?.fire) return;
 
-    const hits = raycaster.current.intersectObjects(scene.children, true);
+    const now = performance.now();
+    if (now - lastShot.current > FIRE_RATE) {
+      setLasers(l => [...l, crypto.randomUUID()]);
+      lastShot.current = now;
+    }
+  });
 
-    if (hits.length > 0) {
-      let enemy = hits[0].object;
-
-      while (enemy && !enemy.userData?.isEnemy) {
-        enemy = enemy.parent;
-      }
-
-      if (!enemy) return;
-
+  // called when laser hits something
+  function handleHit(enemy, laserId) {
+    if (enemy) {
       enemy.userData.health -= 25;
 
       if (enemy.userData.health <= 0) {
@@ -33,23 +29,20 @@ export default function ShootingSystem({ hand, setScore }) {
         setScore(s => s + 1);
       }
     }
+
+    // remove laser after hit or timeout
+    setLasers(l => l.filter(id => id !== laserId));
   }
-
-  useFrame(() => {
-    if (!hand?.fire) return;
-
-    const now = performance.now();
-
-    if (now - lastShot.current > FIRE_RATE) {
-      shoot();
-      setFlash(true); 
-      lastShot.current = now;
-    }
-  });
 
   return (
     <>
-      {flash && <MuzzleFlash onDone={() => setFlash(false)} />}
+      {lasers.map(id => (
+        <LaserBolt
+          key={id}
+          id={id}
+          onHit={handleHit}
+        />
+      ))}
     </>
   );
 }
