@@ -6,17 +6,21 @@ export default function CameraRig({ hand }) {
   const controls = useRef();
   const { camera } = useThree();
   const lastRotation = useRef(0); // Store last rotation
-
+  const lastPitch = useRef(0); // Store last pitch
+  const MAX_PITCH = Math.PI / 20;
   useFrame(() => {
     if (hand?.active) {
-      // Extend rotation range: hand.x (0 to 1) maps to more than 360 degrees
-      // Multiply by 2.5 to get ~450 degrees of rotation for smoother experience
       const yaw = (hand.x - 0.5) * Math.PI * 5; 
       camera.rotation.y = yaw;
-      lastRotation.current = yaw; // Store the rotation
+      lastRotation.current = yaw; 
+
+      let pitch = (hand.y - 0.5) * Math.PI * 2;
+      pitch = Math.max(-MAX_PITCH, Math.min(MAX_PITCH, pitch));
+      camera.rotation.x = pitch;
+      lastPitch.current = pitch;
     } else {
-      // Keep the last rotation when hand is not active
       camera.rotation.y = lastRotation.current;
+      camera.rotation.x = lastPitch.current;
     }
   });
 
