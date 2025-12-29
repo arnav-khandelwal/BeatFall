@@ -7,7 +7,7 @@ import Tree from "./Tree";
 import ShootingSystem from "../Game/ShootingSystem";
 
 
-export default function World({ hand, enemies, setScore }) {
+export default function World({ hand, enemies, setScore,damageEnemy }) {
   const treePositions = [
     [5, 0, -5], [-7, 0, -10], [12, 0, 5], [-3, 0, 8]
     , [8, 0, -15], [-10, 0, 3], [15, 0, -8], [-5, 0, -12]
@@ -41,11 +41,12 @@ export default function World({ hand, enemies, setScore }) {
           <Tree key={i} position={pos} />
         ))}
 
-        <ShootingSystem hand={hand} setScore={setScore} />
+        <ShootingSystem hand={hand} setScore={setScore} damageEnemy={damageEnemy} enemies={enemies}/>
         {/* Render 3D enemies */}
         {enemies && enemies.map(enemy => (
           <Enemy
             key={enemy.id}
+            id={enemy.id}
             position={enemy.position}
             image={enemy.image}
             size={enemy.size}

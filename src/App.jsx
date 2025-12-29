@@ -56,12 +56,11 @@ export default function App({ showSongSelector: externalShowSongSelector, setSho
   }, []);
 
   // Enemy spawning system with strong pulse callback
-  const { enemies } = useEnemies(audio.beatDetected, audio.isPlaying, handleEnemySpawn);
+  const { enemies,damageEnemy} = useEnemies(audio.beatDetected, audio.isPlaying, handleEnemySpawn);
 
   const handleSongSelect = (song) => {
     setSelectedSong(song);
     setShowSongSelector(false);
-    
     // Notify parent that song was selected (hide landing page)
     if (onSongSelected) {
       onSongSelected();
@@ -108,7 +107,7 @@ export default function App({ showSongSelector: externalShowSongSelector, setSho
         pulsesRef={pulsesRef}
       />
 
-      <World hand={activeHand} enemies={enemies} setScore={setScore} />
+      <World hand={hand} enemies={enemies} setScore={setScore} damageEnemy={damageEnemy}/>
 
       <HandCanvas isGameActive={isGameActive}
         landmarks={activeHand.landmarks}

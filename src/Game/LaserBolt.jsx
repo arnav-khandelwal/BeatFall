@@ -9,10 +9,10 @@ export default function LaserBolt({ id, onHit }) {
   const direction = useRef(new THREE.Vector3());
   const raycaster = useRef(new THREE.Raycaster());
 
-  const speed = 25;
-  const maxDistance = 50;
+  const SPEED = 35;
+  const MAX_DISTANCE = 50;
 
-  // initialize direction ONCE (after camera exists)
+  // 🔁 Init direction ONCE
   if (camera && direction.current.lengthSq() === 0) {
     direction.current
       .set(0, 0, -1)
@@ -23,18 +23,18 @@ export default function LaserBolt({ id, onHit }) {
   useFrame((_, delta) => {
     if (!meshRef.current || !camera) return;
 
-    // move laser forward
+    // 🚀 Move laser
     meshRef.current.position.addScaledVector(
       direction.current,
-      speed * delta
+      SPEED * delta
     );
 
-    // setup raycaster (IMPORTANT for sprites)
+    // 🔍 Raycast
     raycaster.current.set(
       meshRef.current.position,
       direction.current
     );
-    raycaster.current.camera = camera; // ✅ REQUIRED for sprites
+    raycaster.current.camera = camera;
 
     const hits = raycaster.current.intersectObjects(
       scene.children,
@@ -42,33 +42,39 @@ export default function LaserBolt({ id, onHit }) {
     );
 
     if (hits.length > 0) {
-      let enemy = hits[0].object;
+      let hit = hits[0].object;
 
-      while (enemy && !enemy.userData?.isEnemy) {
-        enemy = enemy.parent;
+      // 🔼 Walk up until enemyId found
+      while (hit && !hit.userData?.enemyId) {
+        hit = hit.parent;
       }
 
-      onHit(enemy, id);
+if (hit && hit.userData?.enemyId !== undefined) {
+      onHit(hit.userData.enemyId, id);
+    } else {
+      // hit something else (tree / floor)
+      onHit(null, id);
+    }      
     }
-
-    // remove laser if too far
     if (
       meshRef.current.position.distanceTo(camera.position) >
-      maxDistance
+      MAX_DISTANCE
     ) {
       onHit(null, id);
     }
   });
 
-  // start laser from camera position (safe)
-  if (!meshRef.current && camera) {
-    // handled by R3F on first render
-  }
-
   return (
-    <mesh ref={meshRef} position={camera ? camera.position.clone() : [0, 0, 0]}>
-      <icosahedronGeometry args={[0.05, 1]} />
-      <meshBasicMaterial color="#ffcc00" />
+    <mesh
+      ref={meshRef}
+      position={camera ? camera.position.clone() : [0, 0, 0]}
+    >
+      <icosahedronGeometry args={[0.05, 0]} />
+      <meshBasicMaterial
+        color="#ffcc00"
+        transparent
+        opacity={0.9}
+      />
     </mesh>
   );
 }

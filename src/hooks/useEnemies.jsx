@@ -11,6 +11,17 @@ const KILL_RADIUS = 2; // Distance at which enemies die (reach player)
 export function useEnemies(beatDetected, isPlaying, onEnemySpawn) {
   const [enemies, setEnemies] = useState([]);
   const nextIdRef = useRef(0);
+const damageEnemy = (id, dmg) => {
+  setEnemies(prev =>
+    prev
+      .map(e =>
+        e.id === id
+          ? { ...e, health: e.health - dmg }
+          : e
+      )
+      .filter(e => e.health > 0)
+  );
+};
 
   // 1. Spawn enemy on beat - spawn in a circle around the player
   useEffect(() => {
@@ -96,5 +107,5 @@ export function useEnemies(beatDetected, isPlaying, onEnemySpawn) {
     return () => cancelAnimationFrame(raf);
   }, [isPlaying]);
 
-  return { enemies };
+  return { enemies , damageEnemy};
 }

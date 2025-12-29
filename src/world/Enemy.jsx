@@ -3,7 +3,7 @@ import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import * as THREE from "three";
 
-export default function Enemy({ position, image, size, health, maxHealth }) {
+export default function Enemy({ id,position, image, size, health, maxHealth }) {
   const texture = useTexture(image);
 
   const spriteRef = useRef();
@@ -37,7 +37,7 @@ export default function Enemy({ position, image, size, health, maxHealth }) {
   return (
     <group position={position}>
       {/* Enemy sprite */}
-      <sprite ref={spriteRef} scale={[size, size, 1]}>
+      <sprite ref={spriteRef} scale={[size, size, 1]} userData={{enemyId:id}}>
         <spriteMaterial
           map={texture}
           transparent

@@ -2,13 +2,18 @@ import { useRef, useState } from "react";
 import { useFrame } from "@react-three/fiber";
 import LaserBolt from "./LaserBolt";
 
-export default function ShootingSystem({ hand, setScore }) {
+export default function ShootingSystem({
+  hand,
+  setScore,
+  enemies,
+  damageEnemy,
+}) {
   const [lasers, setLasers] = useState([]);
   const lastShot = useRef(0);
 
-  const FIRE_RATE = 400; // ms
+  const FIRE_RATE = 200; // ms
+  const DAMAGE = 25;
 
-  // fire control (machine gun)
   useFrame(() => {
     if (!hand?.fire) return;
 
@@ -19,18 +24,23 @@ export default function ShootingSystem({ hand, setScore }) {
     }
   });
 
-  // called when laser hits something
-  function handleHit(enemy, laserId) {
-    if (enemy) {
-      enemy.userData.health -= 25;
+  // Called by LaserBolt
+  function handleHit(enemyId, laserId) {
+    // laser expired or missed
+    if (enemyId == null) {
+      setLasers(l => l.filter(id => id !== laserId));
+      return;
+    }
+    damageEnemy(enemyId, DAMAGE);
+    const enemy = enemies.find(e => e.id === enemyId);
+    if (!enemy) return;
 
-      if (enemy.userData.health <= 0) {
-        enemy.visible = false;
-        setScore(s => s + 1);
-      }
+    // scoring 
+    if (enemy.health - DAMAGE <= 0) {
+      setScore(s => s + 1);
     }
 
-    // remove laser after hit or timeout
+    // remove laser
     setLasers(l => l.filter(id => id !== laserId));
   }
 
