@@ -9,7 +9,7 @@ export default function CameraRig({ hand }) {
   const lastPitch = useRef(0); // Store last pitch
   useFrame(() => {
     if (hand?.active) {
-      const yaw = (hand.x - 0.5) * Math.PI * 5; 
+      const yaw = (hand.x - 0.5) * Math.PI * 4; 
       camera.rotation.y = yaw;
       lastRotation.current = yaw; 
 

@@ -108,10 +108,10 @@ export default function App({ showSongSelector: externalShowSongSelector, setSho
         pulsesRef={pulsesRef}
       />
 
-      <World hand={hand} enemies={enemies} setScore={setScore} />
+      <World hand={activeHand} enemies={enemies} setScore={setScore} />
 
       <HandCanvas isGameActive={isGameActive}
-        landmarks={hand.landmarks}
+        landmarks={activeHand.landmarks}
         aim={activeHand.aim}
         fire={activeHand.fire}
       />

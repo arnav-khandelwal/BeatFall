@@ -15,7 +15,6 @@ function isFingerExtended(lm, tip, pip) {
 
 export function useHandInput(onUpdate, isGameActive) {
   useEffect(() => {
-    if (!isGameActive) return;
     let handLandmarker;
     let video;
 
@@ -33,20 +32,20 @@ export function useHandInput(onUpdate, isGameActive) {
 
       const stream = await navigator.mediaDevices.getUserMedia({ video: true });
       video.srcObject = stream;
-      if (!isGameActive) {
-        if (video?.srcObject) {
-  video.srcObject.getTracks().forEach(t => t.stop());
-}
-
-        return;
-      }
-      else {
-        video.style.position = "fixed";
+      video.style.position = "fixed";
+      if (isGameActive) {
         video.style.left = "10px";
         video.style.bottom = "120px";
         video.style.width = "180px";
-        document.body.appendChild(video);
+      } else {
+        // Keep video off-screen but active so hand tracking works on landing page
+        video.style.left = "-9999px";
+        video.style.bottom = "0px";
+        video.style.width = "1px";
+        video.style.height = "1px";
+        video.style.opacity = "0";
       }
+      document.body.appendChild(video);
       const vision = await FilesetResolver.forVisionTasks(
         "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@0.10.0/wasm"
       );

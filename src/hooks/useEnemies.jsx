@@ -5,7 +5,7 @@ import gremlinImg from "../assets/enemy_sprites/gremlin_new.png";
 // Use paths relative to your public folder or src/assets
 const ENEMY_IMAGES = [krampusImg, gremlinImg];
 const ENEMY_SPEED = 0.045; // 3D units per frame
-const SPAWN_RADIUS = 20; // Distance from center where enemies spawn
+const SPAWN_RADIUS = 30; // Distance from center where enemies spawn
 const KILL_RADIUS = 2; // Distance at which enemies die (reach player)
 
 export function useEnemies(beatDetected, isPlaying, onEnemySpawn) {
