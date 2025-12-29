@@ -12,7 +12,7 @@ export default function LaserBolt({ id, onHit }) {
   const SPEED = 35;
   const MAX_DISTANCE = 50;
 
-  // 🔁 Init direction ONCE
+  // Init direction ONCE
   if (camera && direction.current.lengthSq() === 0) {
     direction.current
       .set(0, 0, -1)
@@ -23,13 +23,13 @@ export default function LaserBolt({ id, onHit }) {
   useFrame((_, delta) => {
     if (!meshRef.current || !camera) return;
 
-    // 🚀 Move laser
+    //  Move laser
     meshRef.current.position.addScaledVector(
       direction.current,
       SPEED * delta
     );
 
-    // 🔍 Raycast
+    //  Raycast
     raycaster.current.set(
       meshRef.current.position,
       direction.current
@@ -44,7 +44,7 @@ export default function LaserBolt({ id, onHit }) {
     if (hits.length > 0) {
       let hit = hits[0].object;
 
-      // 🔼 Walk up until enemyId found
+      // Walk up until enemyId found
       while (hit && !hit.userData?.enemyId) {
         hit = hit.parent;
       }

@@ -37,7 +37,20 @@ export default function ShootingSystem({
 
     // scoring 
     if (enemy.health - DAMAGE <= 0) {
-      setScore(s => s + 1);
+      let a;
+      if(enemy.type==="gremlin"){
+        a=5;
+      }
+      else if (enemy.type==="krampus"){
+        a=10;
+      }
+      else if(enemy.type==="1"){
+        a=15;
+      }
+      else{
+        a=20;
+      }
+      setScore(s => s + a);
     }
 
     // remove laser

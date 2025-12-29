@@ -35,8 +35,11 @@ export function useHandInput(onUpdate, isGameActive) {
       video.style.position = "fixed";
       if (isGameActive) {
         video.style.left = "10px";
-        video.style.bottom = "120px";
+        video.style.bottom = "110px";
         video.style.width = "180px";
+        video.style.borderRadius = "8px";
+        video.style.border = "2px solid rgba(11, 136, 136, 0.65)"; 
+        
       } else {
         // Keep video off-screen but active so hand tracking works on landing page
         video.style.left = "-9999px";
