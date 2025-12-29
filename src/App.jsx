@@ -51,7 +51,6 @@ useEffect(() => {
   165  // teal-green (aurora vibe)
 ];
 
-
     pulsesRef.current.push({
       x: 0,
       radius: 0,

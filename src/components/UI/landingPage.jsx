@@ -15,16 +15,23 @@ export default function LandingPage({  onFreePlayStart }) {
   React.useEffect(() => {
     if (bgMusicRef.current) {
       bgMusicRef.current.volume = volume;
-      bgMusicRef.current.play().catch(() => {
-        // If autoplay is blocked, play on first user interaction
-        const playOnInteraction = () => {
-          bgMusicRef.current?.play();
-          document.removeEventListener('click', playOnInteraction);
-        };
-        document.addEventListener('click', playOnInteraction);
-      });
+      // Try to play immediately
+      const playPromise = bgMusicRef.current.play();
+      
+      if (playPromise !== undefined) {
+        playPromise.catch(() => {
+          // If autoplay is blocked, play on first user interaction
+          const playOnInteraction = () => {
+            bgMusicRef.current?.play().catch(() => {});
+            document.removeEventListener('click', playOnInteraction);
+            document.removeEventListener('keydown', playOnInteraction);
+          };
+          document.addEventListener('click', playOnInteraction, { once: true });
+          document.addEventListener('keydown', playOnInteraction, { once: true });
+        });
+      }
     }
-  }, []);
+  }, [volume]);
 
   // Update volume when state changes
   React.useEffect(() => {
@@ -309,6 +316,8 @@ export default function LandingPage({  onFreePlayStart }) {
         src="/src/assets/audio/landingpagesong.mp3"
         loop
         preload="auto"
+        autoPlay
+        playsInline
       />
     </div>
   );
