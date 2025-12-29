@@ -1,9 +1,49 @@
 import React, { useState, useRef } from "react";
 import "./landingPage.css";
+import { FaGamepad, FaBell, FaTrophy, FaStar, FaTree, FaSnowflake, FaVolumeUp, FaVolumeMute } from "react-icons/fa";
+import { GiPineTree, GiSparkles } from "react-icons/gi";
+import { IoSnowSharp } from "react-icons/io5";
 
 export default function LandingPage({  onFreePlayStart }) {
   const [showCampaign, setShowCampaign] = useState(false);
+  const [volume, setVolume] = useState(0.1);
+  const [isMuted, setIsMuted] = useState(false);
   const audioContextRef = useRef(null);
+  const bgMusicRef = useRef(null);
+
+  // Start background music on mount or user interaction
+  React.useEffect(() => {
+    if (bgMusicRef.current) {
+      bgMusicRef.current.volume = volume;
+      bgMusicRef.current.play().catch(() => {
+        // If autoplay is blocked, play on first user interaction
+        const playOnInteraction = () => {
+          bgMusicRef.current?.play();
+          document.removeEventListener('click', playOnInteraction);
+        };
+        document.addEventListener('click', playOnInteraction);
+      });
+    }
+  }, []);
+
+  // Update volume when state changes
+  React.useEffect(() => {
+    if (bgMusicRef.current) {
+      bgMusicRef.current.volume = isMuted ? 0 : volume;
+    }
+  }, [volume, isMuted]);
+
+  const toggleMute = () => {
+    setIsMuted(!isMuted);
+  };
+
+  const handleVolumeChange = (e) => {
+    const newVolume = parseFloat(e.target.value);
+    setVolume(newVolume);
+    if (newVolume > 0) {
+      setIsMuted(false);
+    }
+  };
 
   const ensureAudioContext = () => {
     if (typeof window === "undefined") return null;
@@ -131,23 +171,52 @@ export default function LandingPage({  onFreePlayStart }) {
             : `${sizeBase - 0.2 + Math.random() * 0.8}rem`,
         }}
       >
-        {isCandyCane ? "🎁" : "❄"}
+        {isCandyCane ? "🎁" : (
+          i % 7 === 0 ? <GiSparkles /> : 
+          i % 11 === 0 ? <FaStar /> : 
+          <FaSnowflake />
+        )}
       </div>
     );
   })}
-  <div className="center-drifter">❄</div>
+  <div className="center-drifter"><IoSnowSharp /></div>
 </div>
 
       {/* Top Header Tags */}
       <div className="header-tags">
         <div className="tag-box">v0.0.0</div>
         <div className="tag-box gold-text">CHRISTMAS SPECIAL</div>
+        <div className="tag-box volume-control">
+          <button className="volume-toggle" onClick={toggleMute}>
+            {isMuted ? <FaVolumeMute /> : <FaVolumeUp />}
+          </button>
+          <input 
+            type="range" 
+            min="0" 
+            max="1" 
+            step="0.05" 
+            value={volume}
+            onChange={handleVolumeChange}
+            className="volume-slider"
+          />
+        </div>
       </div>
 
       <div className="main-layout">
         {/* Left: Controls */}
         <div className="side-container controls">
-          <h2 className="container-title">CONTROLS</h2>
+          <div className="corner-decoration top-left">
+            <FaTree className="decoration-icon" />
+          </div>
+          <div className="corner-decoration top-right">
+            <GiPineTree className="decoration-icon" />
+            <FaStar className="decoration-berry" />
+          </div>
+          <h2 className="container-title">
+            <FaGamepad className="title-icon" />
+            <FaBell className="title-icon-accent" />
+            CONTROLS
+          </h2>
           <div className="control-group">
             <span className="control-label">CAMERA</span>
             <div className="control-desc"><p>🠔🖐️🠖</p>Open Hand (Left)</div>
@@ -160,6 +229,13 @@ export default function LandingPage({  onFreePlayStart }) {
 
         {/* Center: Main Game UI */}
         <div className="center-box">
+          <div className="top-garland">
+            <FaTree className="garland-tree" />
+            <FaStar className="garland-berry" />
+            <FaTree className="garland-tree" />
+            <FaStar className="garland-berry" />
+            <FaTree className="garland-tree" />
+          </div>
           {showCampaign && (
             <button className="go-back-btn" onClick={handleGoBack}>
               ← BACK
@@ -207,7 +283,18 @@ export default function LandingPage({  onFreePlayStart }) {
 
         {/* Right: Leaderboard */}
         <div className="side-container leaderboard">
-          <h2 className="container-title">LEADERBOARD</h2>
+          <div className="corner-decoration top-left">
+            <FaTree className="decoration-icon" />
+          </div>
+          <div className="corner-decoration top-right">
+            <GiPineTree className="decoration-icon" />
+            <FaStar className="decoration-berry" />
+          </div>
+          <h2 className="container-title">
+            <FaTrophy className="title-icon" />
+            <FaStar className="title-icon-accent" />
+            LEADERBOARD
+          </h2>
           {leaderboard.map((entry, index) => (
             <div key={index} className="leader-entry">
               {index + 1}. {entry.name} - {entry.score}
@@ -215,6 +302,14 @@ export default function LandingPage({  onFreePlayStart }) {
           ))}
         </div>
       </div>
+      
+      {/* Background Music */}
+      <audio 
+        ref={bgMusicRef}
+        src="/src/assets/audio/landingpagesong.mp3"
+        loop
+        preload="auto"
+      />
     </div>
   );
 }
