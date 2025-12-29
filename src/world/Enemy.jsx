@@ -10,7 +10,7 @@ export default function Enemy({ id,position, image, size, health, maxHealth }) {
   const healthRef = useRef();
   const bgRef = useRef();
   const healthColor =
-    health > maxHealth * 0.5 ? "#2ecc71" : "#e74c3c";
+    "#e74c3c";
 
   useFrame(({ clock, camera }) => {
     if (!spriteRef.current) return;

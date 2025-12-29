@@ -1,53 +1,101 @@
+/* src/components/ScopeOverlay.css */
+
 .scope-overlay {
-  position: fixed;
-  inset: 0;
-  z-index: 50;
-  pointer-events: none;
-
-  display: flex;
-  align-items: center;
-  justify-content: center;
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    pointer-events: none;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    /* Soft vignette on the screen edges */
+    background: radial-gradient(circle, transparent 40%, rgba(0,0,0,0.4) 100%);
 }
 
-.scope-circle {
-  position: relative;
-  width: 70vmin;
-  height: 70vmin;
-  border-radius: 50%;
-
-  background: transparent;
-
-  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.75);
-
-  border: 3px solid #f3efef;
+.scope-body {
+    position: relative;
+    width: 82vmin;
+    height: 82vmin;
+    border-radius: 50%;
+    
+    /* Thick black metallic housing */
+    border: 16px solid #2dbf1f;
+    
+    /* Box shadows create the 'tunnel' effect and the metallic shine */
+    box-shadow: 
+        0 0 0 9999px rgba(0, 0, 0, 0.763), 
+        inset 0 0 20px #000,
+        0 0 30px rgba(255,255,255,0.05);
+    
+    overflow: hidden;
+    background: transparent;
 }
 
-.scope-line {
-  position: absolute;
-  background: rgb(243, 236, 236);
+/* Simulated blue-ish lens coating found in real high-end optics */
+.scope-lens-coating {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    background: linear-gradient(135deg, 
+        rgba(60, 99, 255, 0.276) 0%, 
+        transparent 50%, 
+        rgba(255, 255, 255, 0.244) 100%);
 }
 
-.scope-line.v {
-  width: 2px;
-  height: 100%;
-  left: 50%;
-  top: 0;
-  transform: translateX(-50%);
+.reticle {
+    position: absolute;
+    inset: 0;
+    z-index: 2;
 }
 
-.scope-line.h {
-  height: 2px;
-  width: 100%;
-  top: 50%;
-  left: 0;
-  transform: translateY(-50%);
-}
-.scope-circle {
-  animation: recoil 0.1s ease-out;
+.reticle-line {
+    position: absolute;
+    background: #049006; /* Real reticles are black etchings */
+    box-shadow: 0 0 1px rgba(255,255,255,0.2);
 }
 
-@keyframes recoil {
-  0% { transform: scale(1.15); }
-  50% { transform: scale(1.08); }
-  100% { transform: scale(1.15); }
+.reticle-line.v {
+    width: 2px;
+    height: 100%;
+    left: 50%;
+    transform: translateX(-50%);
+}
+
+.reticle-line.h {
+    height: 2px;
+    width: 100%;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+/* Adds measurement dots (Mil-dots) along the lines */
+.mil-dots {
+    width: 100%;
+    height: 100%;
+    background-image: radial-gradient(circle, #000 1.5px, transparent 1.5px);
+    background-size: 5vmin 5vmin;
+    background-position: center;
+}
+
+.center-dot {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 5px;
+    height: 5px;
+    background: #ff0000;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    box-shadow: 0 0 8px #ff0000;
+}
+
+/* Modern "Snappy" Recoil Animation */
+.scope-body.recoil {
+    animation: cod-recoil 0.18s cubic-bezier(0.1, 0.9, 0.2, 1);
+}
+
+@keyframes cod-recoil {
+    0% { transform: scale(1); }
+    30% { transform: translateY(-15px) scale(1.05); } /* The "Kick" */
+    100% { transform: translateY(0) scale(1); }
 }

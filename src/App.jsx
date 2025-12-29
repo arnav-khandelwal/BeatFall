@@ -10,12 +10,21 @@ import World from "./world/World";
 import ScopeOverlay from "./components/UI/ScopeOverlay";
 import Minimap from "./components/UI/Minimap";
 import "./components/UI/ScopeOverlay.css";
+import HealthBar from "./world/UserHealthBar";
 
 export default function App({ showSongSelector: externalShowSongSelector, setShowSongSelector: externalSetShowSongSelector, onSongSelected, onMainMenu, isGameActive }) {
+  const [playerHp, setPlayerHp] = useState(100); /*user's health */
+  // To avoid the "never used" error, a test effect:
+useEffect(() => {
+  console.log("Player HP system initialized at:", playerHp);
+ 
+  setPlayerHp(100); 
+}, [playerHp]);
   const [hand, setHand] = useState({ active: false });
   const [internalShowSongSelector, setInternalShowSongSelector] = useState(false);
   const [selectedSong, setSelectedSong] = useState(null);
   const [score, setScore] = useState(0);
+  
 
   // Use external control if provided, otherwise use internal state
   const showSongSelector = externalShowSongSelector !== undefined ? externalShowSongSelector : internalShowSongSelector;
@@ -114,8 +123,9 @@ export default function App({ showSongSelector: externalShowSongSelector, setSho
         aim={activeHand.aim}
         fire={activeHand.fire}
       />
-
-      <ScopeOverlay visible={activeHand.aim} />
+      {/*UserHealthBar*/}
+      <HealthBar hp={playerHp} /> 
+      <ScopeOverlay visible={activeHand.aim} fire={hand.fire}/>
       {/* Top-right Controls */}
       <div style={{ 
         position: "fixed", 
