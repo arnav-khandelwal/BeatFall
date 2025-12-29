@@ -1,9 +1,9 @@
 import { useState, useEffect, useRef } from "react";
 import krampusImg from "../assets/enemy_sprites/krampus_new.png";
 import gremlinImg from "../assets/enemy_sprites/gremlin_new.png";
-
+import ghostImg from "../assets/enemy_sprites/ghostImg.png"
 // Use paths relative to your public folder or src/assets
-const ENEMY_IMAGES = [krampusImg, gremlinImg];
+const ENEMY_IMAGES = [krampusImg, gremlinImg,ghostImg];
 const ENEMY_SPEED = 0.045; // 3D units per frame
 const SPAWN_RADIUS = 30; // Distance from center where enemies spawn
 const KILL_RADIUS = 2; // Distance at which enemies die (reach player)
