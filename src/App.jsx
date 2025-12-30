@@ -12,6 +12,7 @@ import Minimap from "./components/UI/Minimap";
 import "./components/UI/ScopeOverlay.css";
 import HealthBar from "./world/UserHealthBar";
 import { FaSnowflake } from "react-icons/fa";
+import { updateUserProgress } from "./firebase/customAuth";
 export default function App({ showSongSelector: externalShowSongSelector, setShowSongSelector: externalSetShowSongSelector, onSongSelected, onMainMenu, isGameActive, landingPageMusicControl  }) {
   const MAX_PLAYER_HEALTH=500
   const [playerHp, setPlayerHp] = useState(MAX_PLAYER_HEALTH); /*user's health */
@@ -21,12 +22,50 @@ export default function App({ showSongSelector: externalShowSongSelector, setSho
   const [internalShowSongSelector, setInternalShowSongSelector] = useState(false);
   const [selectedSong, setSelectedSong] = useState(null);
   const [score, setScore] = useState(0);
+  const [userBestScore, setUserBestScore] = useState(null);
+  const [isNewHighScore, setIsNewHighScore] = useState(false);
 
   // Use external control if provided, otherwise use internal state
   const showSongSelector = externalShowSongSelector !== undefined ? externalShowSongSelector : internalShowSongSelector;
   const setShowSongSelector = externalSetShowSongSelector || setInternalShowSongSelector;
 
   const pulsesRef = useRef([]);
+
+  // Load user's best score from localStorage
+  useEffect(() => {
+    const storedUserData = localStorage.getItem('beatfall_user_data');
+    if (storedUserData) {
+      const userData = JSON.parse(storedUserData);
+      setUserBestScore(userData.bestScore || 0);
+    } else {
+      setUserBestScore(null);
+    }
+  }, []);
+
+  // Check and update high score when game ends
+  useEffect(() => {
+    if (gameOver && userBestScore !== null && score > userBestScore) {
+      setIsNewHighScore(true);
+      
+      // Update in Firebase
+      const storedUserData = localStorage.getItem('beatfall_user_data');
+      if (storedUserData) {
+        const userData = JSON.parse(storedUserData);
+        const username = userData.username;
+        
+        updateUserProgress(username, undefined, score).then((result) => {
+          if (result.success) {
+            // Update localStorage
+            userData.bestScore = score;
+            localStorage.setItem('beatfall_user_data', JSON.stringify(userData));
+            setUserBestScore(score);
+          }
+        });
+      }
+    } else if (gameOver) {
+      setIsNewHighScore(false);
+    }
+  }, [gameOver, score, userBestScore]);
 
   useHandInput(setHand, isGameActive);
 
@@ -118,6 +157,16 @@ useEffect(() => {
   }
 }, [gameOver, audio]);
 
+  const handleRestartGame = () => {
+    setGameOver(false);
+    setPlayerHp(MAX_PLAYER_HEALTH);
+    setScore(0);
+    setIsNewHighScore(false);
+    // Restart audio
+    if (audio && selectedSong) {
+      audio.restart?.();
+    }
+  };
 
   return (
     <>
@@ -311,8 +360,33 @@ useEffect(() => {
         Score: {score}
       </div>
       }
-      {/* Minimap */}
-      <Minimap enemies={enemies} hand={activeHand} />
+      {/* Minimap and High Score */}
+      <div style={{
+        position: "fixed",
+        top: 10,
+        left: 220,
+        display: "flex",
+        alignItems: "center",
+        gap: "15px",
+        zIndex: 100
+      }}>
+        <Minimap enemies={enemies} hand={activeHand} />
+        {userBestScore !== null && (
+          <div style={{
+            padding: "8px 16px",
+            background: "rgba(138, 43, 226, 0.12)",
+            color: "#8a2be2",
+            border: "2px solid rgba(138, 43, 226, 0.4)",
+            borderRadius: "8px",
+            fontWeight: "bold",
+            fontSize: "14px",
+            textShadow: "0 0 8px rgba(138, 43, 226, 0.8)",
+            whiteSpace: "nowrap"
+          }}>
+            High Score: {userBestScore}
+          </div>
+        )}
+      </div>
 
       {gameOver && (
   <div style={{
@@ -325,25 +399,89 @@ useEffect(() => {
     alignItems: "center",
     justifyContent: "center",
     color: "white",
-    fontFamily: "monospace"
+    fontFamily: "monospace",
+    overflow: "hidden"
   }}>
-    <h1 style={{ fontSize: "64px", marginBottom: "20px" }}>
+    {/* Confetti Effect */}
+    {isNewHighScore && (
+      <div style={{
+        position: "absolute",
+        inset: 0,
+        pointerEvents: "none",
+        overflow: "hidden"
+      }}>
+        {[...Array(50)].map((_, i) => (
+          <div
+            key={i}
+            style={{
+              position: "absolute",
+              top: `-${Math.random() * 20}%`,
+              left: `${Math.random() * 100}%`,
+              width: "10px",
+              height: "10px",
+              background: `hsl(${Math.random() * 360}, 100%, 50%)`,
+              animation: `confettiFall ${2 + Math.random() * 3}s linear infinite`,
+              animationDelay: `${Math.random() * 2}s`,
+              transform: `rotate(${Math.random() * 360}deg)`
+            }}
+          />
+        ))}
+      </div>
+    )}
+
+    <style>{`
+      @keyframes confettiFall {
+        to {
+          transform: translateY(100vh) rotate(720deg);
+          opacity: 0;
+        }
+      }
+    `}</style>
+
+    {isNewHighScore && (
+      <h2 style={{
+        fontSize: "48px",
+        color: "#FFD700",
+        textShadow: "0 0 20px #FFD700, 0 0 40px #FFD700",
+        marginBottom: "20px",
+        animation: "pulse 1s ease-in-out infinite",
+        fontWeight: "900"
+      }}>
+        🎉 NEW HIGH SCORE!!! 🎉
+      </h2>
+    )}
+
+    <style>{`
+      @keyframes pulse {
+        0%, 100% { transform: scale(1); }
+        50% { transform: scale(1.1); }
+      }
+    `}</style>
+
+    <h1 style={{ fontSize: "64px", marginBottom: "20px", zIndex: 1 }}>
       <span style={{ marginRight: "58px" }}>GAME</span>
-<span>
-       VER
+      <span>
+        VER
         <FaSnowflake className="decoration-berry glow-snowflake" size={50} style={{
-      position: "relative",
-      left: "-155px",
-      bottom:"-1px"
-    }}></FaSnowflake>
-</span>
+          position: "relative",
+          left: "-155px",
+          bottom:"-1px"
+        }}></FaSnowflake>
+      </span>
     </h1>
 
-    <p style={{ fontSize: "24px", marginBottom: "30px" }}>
+    <p style={{ fontSize: "32px", marginBottom: "10px", fontWeight: "bold", zIndex: 1 }}>
       Final Score: {score}
     </p>
+    
+    {userBestScore !== null && (
+      <p style={{ fontSize: "24px", marginBottom: "30px", color: "#FFD700", zIndex: 1 }}>
+        Your High Score: {isNewHighScore ? score : userBestScore}
+      </p>
+    )}
+
     <button
-      onClick={() => window.location.reload()}
+      onClick={handleRestartGame}
       style={{
         padding: "12px 20px",
         fontSize: "18px",
@@ -351,10 +489,12 @@ useEffect(() => {
         borderRadius: "8px",
         border: "none",
         background: "#ff3333",
-        color: "white"
+        color: "white",
+        zIndex: 1,
+        fontWeight: "bold"
       }}
     >
-      Restart
+      Restart Game
     </button>
   </div>
 )}

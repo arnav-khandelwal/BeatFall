@@ -6,7 +6,7 @@ import LoginModal from "./LoginModal";
 import LogoutModal from "./LogoutModal";
 import "./Settings.css";
 
-export default function Settings({ onClose, initialSettings, onSettingsChange }) {
+export default function Settings({ onClose, initialSettings, onSettingsChange, onUserDataChange }) {
   const [mainMenuVolume, setMainMenuVolume] = useState(initialSettings.mainMenuVolume);
   const [hapticsVolume, setHapticsVolume] = useState(initialSettings.hapticsVolume);
   const [gameVolume, setGameVolume] = useState(initialSettings.gameVolume);
@@ -197,14 +197,35 @@ export default function Settings({ onClose, initialSettings, onSettingsChange })
   };
 
   const handleLoginSuccess = (user) => {
+    // Store user data in localStorage
+    const userData = {
+      username: user.username,
+      level: user.level || 0,
+      bestScore: user.bestScore || 0
+    };
+    localStorage.setItem('beatfall_user_data', JSON.stringify(userData));
+    
     setCurrentUser(user);
     setShowLoginModal(false);
+    
+    // Notify parent to refresh user data
+    if (onUserDataChange) {
+      onUserDataChange();
+    }
   };
 
   const handleLogoutConfirm = () => {
+    // Clear all user-related data from localStorage
     localStorage.removeItem('beatfall_username');
+    localStorage.removeItem('beatfall_user_data');
+    
     setCurrentUser(null);
     setShowLogoutModal(false);
+    
+    // Notify parent to refresh user data
+    if (onUserDataChange) {
+      onUserDataChange();
+    }
   };
 
   return (

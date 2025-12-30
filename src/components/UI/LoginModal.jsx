@@ -106,10 +106,20 @@ export default function LoginModal({ onClose, onLoginSuccess }) {
 
       if (result.success) {
         playClickSound();
-        // Save username to localStorage
+        
+        // Prepare user data
+        const userData = {
+          username: username,
+          level: result.user?.level || 0,
+          bestScore: result.user?.bestScore || 0
+        };
+        
+        // Save to localStorage
         localStorage.setItem('beatfall_username', username);
+        localStorage.setItem('beatfall_user_data', JSON.stringify(userData));
+        
         if (onLoginSuccess) {
-          onLoginSuccess(result.user || { username });
+          onLoginSuccess(userData);
         }
         onClose();
       } else {

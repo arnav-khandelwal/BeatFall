@@ -1,4 +1,4 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import "./landingPage.css";
 import { FaGamepad, FaBell, FaTrophy, FaStar, FaTree, FaSnowflake, FaVolumeUp, FaVolumeMute } from "react-icons/fa";
 import { GiPineTree, GiSparkles } from "react-icons/gi";
@@ -7,10 +7,16 @@ import { HiArrowSmLeft } from "react-icons/hi";
 import { HiArrowSmRight } from "react-icons/hi";
 import { FaHandPaper } from "react-icons/fa";
 import Settings from "./Settings";
+import { getUserData } from "../../firebase/customAuth";
+import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
+import { db } from "../../firebase/firebase";
 
 export default function LandingPage({  onFreePlayStart, onMusicControlReady }) {
   const [showCampaign, setShowCampaign] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [userLevel, setUserLevel] = useState(0);
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+  const [leaderboard, setLeaderboard] = useState([]);
   
   // Load settings from localStorage
   const [settings, setSettings] = useState(() => {
@@ -30,6 +36,80 @@ export default function LandingPage({  onFreePlayStart, onMusicControlReady }) {
   const audioContextRef = useRef(null);
   const bgMusicRef = useRef(null);
   const [isTemporarilyMuted, setIsTemporarilyMuted] = useState(false);
+
+  // Load user data from localStorage and fetch if needed
+  useEffect(() => {
+    const loadUserData = async () => {
+      // Try localStorage first
+      const storedUserData = localStorage.getItem('beatfall_user_data');
+      if (storedUserData) {
+        const userData = JSON.parse(storedUserData);
+        setUserLevel(userData.level || 0);
+        setIsLoggedIn(true);
+      } else {
+        // Fallback: check for username and fetch from Firebase
+        const username = localStorage.getItem('beatfall_username');
+        if (username) {
+          const result = await getUserData(username);
+          if (result.success) {
+            const userData = {
+              username: result.user.username,
+              level: result.user.level || 0,
+              bestScore: result.user.bestScore || 0
+            };
+            localStorage.setItem('beatfall_user_data', JSON.stringify(userData));
+            setUserLevel(userData.level);
+            setIsLoggedIn(true);
+          }
+        } else {
+          setIsLoggedIn(false);
+          setUserLevel(0);
+        }
+      }
+    };
+    loadUserData();
+  }, []);
+
+  // Fetch leaderboard from Firebase
+  useEffect(() => {
+    const fetchLeaderboard = async () => {
+      try {
+        const usersRef = collection(db, 'users');
+        const q = query(usersRef, orderBy('bestScore', 'desc'), limit(10));
+        const querySnapshot = await getDocs(q);
+        
+        const leaderboardData = [];
+        querySnapshot.forEach((doc) => {
+          const data = doc.data();
+          leaderboardData.push({
+            name: data.username,
+            score: data.bestScore || 0
+          });
+        });
+        
+        setLeaderboard(leaderboardData);
+      } catch (error) {
+        console.error('Error fetching leaderboard:', error);
+        // Set empty leaderboard on error
+        setLeaderboard([]);
+      }
+    };
+    
+    fetchLeaderboard();
+  }, []);
+
+  // Function to refresh user data after login/logout
+  const refreshUserData = () => {
+    const storedUserData = localStorage.getItem('beatfall_user_data');
+    if (storedUserData) {
+      const userData = JSON.parse(storedUserData);
+      setUserLevel(userData.level || 0);
+      setIsLoggedIn(true);
+    } else {
+      setUserLevel(0);
+      setIsLoggedIn(false);
+    }
+  };
 
   // Expose music control to parent
   React.useEffect(() => {
@@ -146,12 +226,6 @@ export default function LandingPage({  onFreePlayStart, onMusicControlReady }) {
     osc.stop(now + 0.25);
   };
 
-  // Mock leaderboard data based on the image
-  const leaderboard = [
-    { name: "SANTA_SLAYER", score: 2500 },
-    { name: "ELF_HUNTER", score: 1800 },
-  ];
-
   // Generate level grid (1-20)
   const levels = Array.from({ length: 20 }, (_, i) => i + 1);
 
@@ -236,8 +310,7 @@ export default function LandingPage({  onFreePlayStart, onMusicControlReady }) {
         <Settings
           onClose={() => setShowSettings(false)}
           initialSettings={settings}
-          onSettingsChange={handleSettingsChange}
-        />
+          onSettingsChange={handleSettingsChange}          onUserDataChange={refreshUserData}        />
       )}
 
       <div className="main-layout">
@@ -270,7 +343,14 @@ export default function LandingPage({  onFreePlayStart, onMusicControlReady }) {
         <img src="/src/assets/backgrounds/cornerWreath.png" alt="" className="bot-right-wreath"/>
           
           {showCampaign && (
-            <button className="go-back-btn" onClick={handleGoBack}>
+            <button 
+              className="go-back-btn" 
+              onClick={() => {
+                playClickThump();
+                handleGoBack();
+              }}
+              onMouseEnter={playHoverBell}
+            >
               ← BACK
             </button>
           )}
@@ -301,15 +381,55 @@ export default function LandingPage({  onFreePlayStart, onMusicControlReady }) {
               </button>
             </div>
           ) : (
-            <div className="level-grid">
-              {levels.map((level) => (
-                <div key={level} className="level-box locked">
-                  <div className="level-number">{level}</div>
-                  <div className="lock-overlay">
-                    <span className="lock-icon">🔒</span>
+            <div className="campaign-levels-container">
+              <div className="level-grid">
+                {levels.map((level) => {
+                  const isUnlocked = isLoggedIn && level <= userLevel + 1;
+                  return (
+                    <div 
+                      key={level} 
+                      className={`level-box ${isUnlocked ? 'unlocked' : 'locked'}`}
+                      onMouseEnter={() => {
+                        if (isUnlocked && !settings.hapticsMuted) {
+                          playHoverBell();
+                        }
+                      }}
+                      onClick={() => {
+                        if (isUnlocked) {
+                          playClickThump();
+                          // Add level start logic here
+                        }
+                      }}
+                    >
+                      <div className="level-number">{level}</div>
+                      {!isUnlocked && (
+                        <div className="lock-overlay">
+                          <span className="lock-icon">🔒</span>
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+              {!isLoggedIn && (
+                <div className="login-required-overlay">
+                  <div className="login-required-card">
+                    <span className="login-required-icon">🔒</span>
+                    <h3 className="login-required-title">Login Required</h3>
+                    <p className="login-required-text">Sign in to unlock and play campaign levels</p>
+                    <button 
+                      className="login-required-button"
+                      onClick={() => {
+                        playClickThump();
+                        setShowSettings(true);
+                      }}
+                      onMouseEnter={playHoverBell}
+                    >
+                      Login to Play Levels
+                    </button>
                   </div>
                 </div>
-              ))}
+              )}
             </div>
           )}
         </div>
@@ -325,11 +445,17 @@ export default function LandingPage({  onFreePlayStart, onMusicControlReady }) {
             <FaStar className="title-icon-accent" />
             LEADERBOARD
           </h2>
-          {leaderboard.map((entry, index) => (
-            <div key={index} className="leader-entry">
-              {index + 1}. {entry.name} - {entry.score}
+          {leaderboard.length > 0 ? (
+            leaderboard.map((entry, index) => (
+              <div key={index} className="leader-entry">
+                {index + 1}. {entry.name} - {entry.score}
+              </div>
+            ))
+          ) : (
+            <div className="leader-entry empty">
+              No scores yet!
             </div>
-          ))}
+          )}
         </div>
       </div>
       
