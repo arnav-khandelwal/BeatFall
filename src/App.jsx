@@ -13,11 +13,11 @@ import "./components/UI/ScopeOverlay.css";
 import HealthBar from "./world/UserHealthBar";
 import { FaSnowflake } from "react-icons/fa";
 import { updateUserProgress } from "./firebase/customAuth";
-export default function App({ showSongSelector: externalShowSongSelector, setShowSongSelector: externalSetShowSongSelector, onSongSelected, onMainMenu, isGameActive, landingPageMusicControl  }) {
-  const MAX_PLAYER_HEALTH=500
+import "./components/UI/landingPage.css"
+export default function App({ showSongSelector: externalShowSongSelector, setShowSongSelector: externalSetShowSongSelector, onSongSelected, onMainMenu, isGameActive, landingPageMusicControl }) {
+  const MAX_PLAYER_HEALTH = 500
   const [playerHp, setPlayerHp] = useState(MAX_PLAYER_HEALTH); /*user's health */
   const [gameOver, setGameOver] = useState(false);
-
   const [hand, setHand] = useState({ active: false });
   const [internalShowSongSelector, setInternalShowSongSelector] = useState(false);
   const [selectedSong, setSelectedSong] = useState(null);
@@ -99,21 +99,21 @@ export default function App({ showSongSelector: externalShowSongSelector, setSho
   }, []);
 
   const handlePlayerDamage = useCallback((enemy) => {
-  const DAMAGE_MAP = {
-    krampus: 20,
-    gremlin: 10,
-    ghostImg: 5,
-    BOSS: 50
-  };
+    const DAMAGE_MAP = {
+      krampus: 20,
+      gremlin: 10,
+      ghostImg: 5,
+      BOSS: 50
+    };
 
-  const DAMAGE = DAMAGE_MAP[enemy.type] ?? 10;
+    const DAMAGE = DAMAGE_MAP[enemy.type] ?? 10;
 
-  setPlayerHp(prev => {
-    const nextHp = Math.max(0, prev - DAMAGE);
-    if (nextHp === 0) setGameOver(true);
-    return nextHp;
-  });
-}, []);
+    setPlayerHp(prev => {
+      const nextHp = Math.max(0, prev - DAMAGE);
+      if (nextHp === 0) setGameOver(true);
+      return nextHp;
+    });
+  }, []);
 
 
   // Enemy spawning system with strong pulse callback
@@ -151,11 +151,11 @@ export default function App({ showSongSelector: externalShowSongSelector, setSho
     }
   };
 
-useEffect(() => {
-  if (gameOver && audio?.isPlaying) {
-    audio.pause();
-  }
-}, [gameOver, audio]);
+  useEffect(() => {
+    if (gameOver && audio?.isPlaying) {
+      audio.pause();
+    }
+  }, [gameOver, audio]);
 
   const handleRestartGame = () => {
     setGameOver(false);
@@ -389,115 +389,68 @@ useEffect(() => {
       </div>
 
       {gameOver && (
-  <div style={{
-    position: "fixed",
-    inset: 0,
-    background: "rgba(0,0,0,0.85)",
-    zIndex: 99999,
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    color: "white",
-    fontFamily: "monospace",
-    overflow: "hidden"
-  }}>
-    {/* Confetti Effect */}
-    {isNewHighScore && (
-      <div style={{
-        position: "absolute",
-        inset: 0,
-        pointerEvents: "none",
-        overflow: "hidden"
-      }}>
-        {[...Array(50)].map((_, i) => (
-          <div
-            key={i}
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          background: "rgba(0,0,0,0.85)",
+          zIndex: 99999,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "white",
+          fontFamily: "monospace"
+        }}>
+          <h1 className="game-logo"
             style={{
-              position: "absolute",
-              top: `-${Math.random() * 20}%`,
-              left: `${Math.random() * 100}%`,
-              width: "10px",
-              height: "10px",
-              background: `hsl(${Math.random() * 360}, 100%, 50%)`,
-              animation: `confettiFall ${2 + Math.random() * 3}s linear infinite`,
-              animationDelay: `${Math.random() * 2}s`,
-              transform: `rotate(${Math.random() * 360}deg)`
+              fontSize: "64px",
+              marginBottom: "20px",
+              display: "flex",
+              alignItems: "center",
+              gap: "16px",
+              letterSpacing: "4px",
             }}
-          />
-        ))}
-      </div>
-    )}
+          >
+            <span>GAME</span>
 
-    <style>{`
-      @keyframes confettiFall {
-        to {
-          transform: translateY(100vh) rotate(720deg);
-          opacity: 0;
-        }
-      }
-    `}</style>
+            <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <FaSnowflake
+                size={54}
+                className="decoration-berry glow-snowflake"
+                style={{ transform: "translateY(-4px) translateX(6px)" }}
+              />
+              <span>VER</span>
+            </span>
+          </h1>
 
-    {isNewHighScore && (
-      <h2 style={{
-        fontSize: "48px",
-        color: "#FFD700",
-        textShadow: "0 0 20px #FFD700, 0 0 40px #FFD700",
-        marginBottom: "20px",
-        animation: "pulse 1s ease-in-out infinite",
-        fontWeight: "900"
-      }}>
-        🎉 NEW HIGH SCORE!!! 🎉
-      </h2>
-    )}
+          <p className="game-logo" style={{ fontSize: "24px", marginBottom: "30px" }}>
+            Final Score: {score}
+          </p>
 
-    <style>{`
-      @keyframes pulse {
-        0%, 100% { transform: scale(1); }
-        50% { transform: scale(1.1); }
-      }
-    `}</style>
+             {userBestScore !== null && (
+              <p style={{ fontSize: "24px", marginBottom: "30px", color: "#FFD700", zIndex: 1 }}>
+                Your High Score: {isNewHighScore ? score : userBestScore}
+              </p>
+            )}
 
-    <h1 style={{ fontSize: "64px", marginBottom: "20px", zIndex: 1 }}>
-      <span style={{ marginRight: "58px" }}>GAME</span>
-      <span>
-        VER
-        <FaSnowflake className="decoration-berry glow-snowflake" size={50} style={{
-          position: "relative",
-          left: "-155px",
-          bottom:"-1px"
-        }}></FaSnowflake>
-      </span>
-    </h1>
 
-    <p style={{ fontSize: "32px", marginBottom: "10px", fontWeight: "bold", zIndex: 1 }}>
-      Final Score: {score}
-    </p>
-    
-    {userBestScore !== null && (
-      <p style={{ fontSize: "24px", marginBottom: "30px", color: "#FFD700", zIndex: 1 }}>
-        Your High Score: {isNewHighScore ? score : userBestScore}
-      </p>
-    )}
-
-    <button
-      onClick={handleRestartGame}
-      style={{
-        padding: "12px 20px",
-        fontSize: "18px",
-        cursor: "pointer",
-        borderRadius: "8px",
-        border: "none",
-        background: "#ff3333",
-        color: "white",
-        zIndex: 1,
-        fontWeight: "bold"
-      }}
-    >
-      Restart Game
-    </button>
-  </div>
-)}
+          
+          <button className="mode-button"
+            onClick={() => window.location.reload()}
+            style={{
+              padding: "12px 20px",
+              fontSize: "18px",
+              cursor: "pointer",
+              borderRadius: "8px",
+              border: "none",
+              background: "rgba(234, 20, 20, 0.6)",
+              color: "white",
+            }}
+          >
+            Restart
+          </button>
+        </div>
+      )}
     </>
   );
 }
