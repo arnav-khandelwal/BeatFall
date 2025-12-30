@@ -30,6 +30,7 @@ export default function App({ showSongSelector: externalShowSongSelector, setSho
   const setShowSongSelector = externalSetShowSongSelector || setInternalShowSongSelector;
 
   const pulsesRef = useRef([]);
+  const audioContextRef = useRef(null);
 
   // Load user's best score from localStorage
   useEffect(() => {
@@ -115,6 +116,56 @@ export default function App({ showSongSelector: externalShowSongSelector, setSho
     });
   }, []);
 
+  // Haptics functions
+  const ensureAudioContext = () => {
+    if (typeof window === "undefined") return null;
+    const AudioCtx = window.AudioContext || window.webkitAudioContext;
+    if (!AudioCtx) return null;
+    if (!audioContextRef.current) {
+      audioContextRef.current = new AudioCtx();
+    }
+    return audioContextRef.current;
+  };
+
+  const playClickSound = async () => {
+    // Get settings from localStorage
+    const storedSettings = localStorage.getItem('beatfall_settings');
+    let settings = { hapticsMuted: false, hapticsVolume: 0.5 };
+    if (storedSettings) {
+      settings = JSON.parse(storedSettings);
+    }
+    
+    if (settings.hapticsMuted) return;
+    const ctx = ensureAudioContext();
+    if (!ctx) return;
+    if (ctx.state === "suspended") {
+      try {
+        await ctx.resume();
+      } catch {
+        return;
+      }
+    }
+
+    const now = ctx.currentTime;
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = "sine";
+    osc.frequency.setValueAtTime(220, now);
+    osc.frequency.exponentialRampToValueAtTime(80, now + 0.18);
+
+    const volume = settings.hapticsVolume * 0.08;
+    gain.gain.setValueAtTime(0.0, now);
+    gain.gain.linearRampToValueAtTime(volume, now + 0.02);
+    gain.gain.exponentialRampToValueAtTime(0.0001, now + 0.22);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+
+    osc.start(now);
+    osc.stop(now + 0.25);
+  };
+
 
   // Enemy spawning system with strong pulse callback
   const { enemies, damageEnemy } = useEnemies(audio.beatDetected, audio.isPlaying && !gameOver, handleEnemySpawn, handlePlayerDamage);
@@ -145,6 +196,11 @@ export default function App({ showSongSelector: externalShowSongSelector, setSho
     }
     // Clear selected song
     setSelectedSong(null);
+    // Reset game over state
+    setGameOver(false);
+    setPlayerHp(MAX_PLAYER_HEALTH);
+    setScore(0);
+    setIsNewHighScore(false);
     // Navigate to main menu
     if (onMainMenu) {
       onMainMenu();
@@ -428,7 +484,7 @@ export default function App({ showSongSelector: externalShowSongSelector, setSho
           </p>
 
              {userBestScore !== null && (
-              <p style={{ fontSize: "24px", marginBottom: "30px", color: "#FFD700", zIndex: 1 }}>
+              <p className="game-logo" style={{ fontSize: "24px", marginBottom: "30px" }}>
                 Your High Score: {isNewHighScore ? score : userBestScore}
               </p>
             )}
@@ -436,7 +492,10 @@ export default function App({ showSongSelector: externalShowSongSelector, setSho
 
           
           <button className="mode-button"
-            onClick={() => window.location.reload()}
+            onClick={() => {
+              playClickSound();
+              handleRestartGame();
+            }}
             style={{
               padding: "12px 20px",
               fontSize: "18px",
@@ -445,9 +504,29 @@ export default function App({ showSongSelector: externalShowSongSelector, setSho
               border: "none",
               background: "rgba(234, 20, 20, 0.6)",
               color: "white",
+              marginBottom: "15px",
             }}
           >
             Restart
+          </button>
+
+          <button className="mode-button"
+            onClick={() => {
+              playClickSound();
+              handleMainMenuClick();
+            }}
+            style={{
+              padding: "12px 20px",
+              fontSize: "18px",
+              cursor: "pointer",
+              borderRadius: "8px",
+              border: "none",
+              background: "rgba(138, 43, 226, 0.6)",
+              color: "white",
+            }}
+          >
+            <IoHome style={{ marginRight: "8px", verticalAlign: "middle" }} />
+            Main Menu
           </button>
         </div>
       )}
