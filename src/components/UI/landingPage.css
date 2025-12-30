@@ -201,6 +201,34 @@
   gap: 6px;
 }
 
+.controls-help-btn {
+  margin-left: auto;
+  background: rgba(255, 204, 0, 0.15);
+  border: 2px solid rgba(255, 204, 0, 0.4);
+  color: #ffcc00;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 18px;
+  transition: all 0.3s ease;
+  padding: 0;
+}
+
+.controls-help-btn:hover {
+  background: rgba(255, 204, 0, 0.3);
+  border-color: #ffcc00;
+  transform: scale(1.1);
+  box-shadow: 0 0 12px rgba(255, 204, 0, 0.5);
+}
+
+.controls-help-btn:active {
+  transform: scale(0.95);
+}
+
 .title-icon {
   font-size: 1.1rem;
   opacity: 0.75;

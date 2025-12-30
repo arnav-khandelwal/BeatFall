@@ -1,5 +1,5 @@
 import React from "react";
-import { IoClose } from "react-icons/io5";
+import { IoClose, IoGameController } from "react-icons/io5";
 import { MdPanTool } from "react-icons/md";
 import { FaHandPaper } from "react-icons/fa";
 import { GiHandOk } from "react-icons/gi";
@@ -14,7 +14,10 @@ export default function GameHelpModal({ onClose }) {
           <IoClose />
         </button>
         
-        <h2 className="help-modal-title">🎮 HOW TO PLAY</h2>
+        <h2 className="help-modal-title">
+          <IoGameController style={{ marginRight: '10px', fontSize: '2.2rem' }} />
+          HOW TO PLAY
+        </h2>
         
         <div className="help-section">
           <h3 className="help-section-title">CONTROLS</h3>
@@ -46,7 +49,9 @@ export default function GameHelpModal({ onClose }) {
           <h3 className="help-section-title">ENEMIES & SCORING</h3>
           
           <div className="help-enemy-item">
-            <div className="help-enemy-badge gremlin">👺</div>
+            <div className="help-enemy-badge gremlin">
+              <img src="/src/assets/enemy_sprites/gremlin.png" alt="Gremlin" className="help-enemy-img" />
+            </div>
             <div className="help-enemy-details">
               <strong>Gremlin</strong>
               <p>Damage: 10 HP | Shots to kill: 1</p>
@@ -55,7 +60,9 @@ export default function GameHelpModal({ onClose }) {
           </div>
           
           <div className="help-enemy-item">
-            <div className="help-enemy-badge ghost">👻</div>
+            <div className="help-enemy-badge ghost">
+              <img src="/src/assets/enemy_sprites/ghostImg.png" alt="Ghost" className="help-enemy-img" />
+            </div>
             <div className="help-enemy-details">
               <strong>Ghost</strong>
               <p>Damage: 5 HP | Shots to kill: 1</p>
@@ -64,7 +71,9 @@ export default function GameHelpModal({ onClose }) {
           </div>
           
           <div className="help-enemy-item">
-            <div className="help-enemy-badge krampus">😈</div>
+            <div className="help-enemy-badge krampus">
+              <img src="/src/assets/enemy_sprites/krampus.png" alt="Krampus" className="help-enemy-img" />
+            </div>
             <div className="help-enemy-details">
               <strong>Krampus</strong>
               <p>Damage: 20 HP | Shots to kill: 3</p>
@@ -73,7 +82,9 @@ export default function GameHelpModal({ onClose }) {
           </div>
           
           <div className="help-enemy-item">
-            <div className="help-enemy-badge boss">👹</div>
+            <div className="help-enemy-badge boss">
+              <img src="/src/assets/enemy_sprites/orcBoss.png" alt="BOSS" className="help-enemy-img" />
+            </div>
             <div className="help-enemy-details">
               <strong>BOSS</strong>
               <p>Damage: 50 HP | Shots to kill: 5+</p>

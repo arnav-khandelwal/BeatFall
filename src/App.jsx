@@ -334,7 +334,13 @@ export default function App({ showSongSelector: externalShowSongSelector, setSho
 
         {/* Help Button */}
         <button
-          onClick={() => setShowHelpModal(true)}
+          onClick={() => {
+            setShowHelpModal(true);
+            // Pause audio if playing
+            if (audio?.isPlaying) {
+              audio.pause();
+            }
+          }}
           style={{
             padding: "12px 18px",
             fontSize: "24px",
@@ -532,7 +538,13 @@ export default function App({ showSongSelector: externalShowSongSelector, setSho
 
       {/* Game Help Modal */}
       {showHelpModal && (
-        <GameHelpModal onClose={() => setShowHelpModal(false)} />
+        <GameHelpModal onClose={() => {
+          setShowHelpModal(false);
+          // Resume audio if there was a selected song and game is active
+          if (selectedSong && isGameActive && !gameOver) {
+            audio.play();
+          }
+        }} />
       )}
     </>
   );
