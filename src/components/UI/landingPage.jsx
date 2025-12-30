@@ -1,11 +1,11 @@
 import React, { useState, useRef, useEffect } from "react";
 import "./landingPage.css";
-import { FaGamepad, FaBell, FaTrophy, FaStar, FaTree, FaSnowflake, FaVolumeUp, FaVolumeMute } from "react-icons/fa";
-import { GiPineTree, GiSparkles } from "react-icons/gi";
-import { IoSnowSharp, IoSettings } from "react-icons/io5";
-import { HiArrowSmLeft } from "react-icons/hi";
-import { HiArrowSmRight } from "react-icons/hi";
-import { FaHandPaper } from "react-icons/fa";
+import { FaGamepad, FaBell, FaTrophy, FaStar, FaTree, FaSnowflake, FaVolumeUp, FaVolumeMute, FaHandPaper, FaHandRock } from "react-icons/fa";
+import { GiPineTree, GiSparkles, GiHandOk } from "react-icons/gi";
+import { IoSnowSharp, IoSettings, IoHandLeftSharp, IoHandRightSharp } from "react-icons/io5";
+import { HiArrowSmLeft, HiArrowSmRight } from "react-icons/hi";
+import { MdPanTool } from "react-icons/md";
+import { BiTargetLock } from "react-icons/bi";
 import Settings from "./Settings";
 import { getUserData } from "../../firebase/customAuth";
 import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
@@ -325,13 +325,39 @@ export default function LandingPage({  onFreePlayStart, onMusicControlReady }) {
             <FaBell className="title-icon-accent" />
             CONTROLS
           </h2>
-          <div className="control-group">
-            <span className="control-label">CAMERA</span>
-            <div className="control-desc"><p><HiArrowSmLeft /> <FaHandPaper /> <HiArrowSmRight /></p>Open Hand (Left)</div>
+          
+          {/* CAMERA Sub-card */}
+          <div className="control-subcard">
+            <div className="control-label">MOVE</div>
+            <div className="gesture-container">
+              <div className="gesture-capsule">
+                <HiArrowSmLeft className="gesture-arrow" />
+              </div>
+              <div className="gesture-capsule main-gesture">
+                <MdPanTool className="gesture-icon hand-move" />
+              </div>
+              <div className="gesture-capsule">
+                <HiArrowSmRight className="gesture-arrow" />
+              </div>
+            </div>
+            <div className="control-desc">Move open left hand left/right</div>
           </div>
-          <div className="control-group">
-            <span className="control-label">SHOOT</span>
-            <div className="control-desc"> <p> <FaHandPaper /> <HiArrowSmRight /> 🤏</p>Pinch Gesture</div>
+          
+          {/* SHOOT Sub-card */}
+          <div className="control-subcard">
+            <div className="control-label">SHOOT</div>
+            <div className="gesture-container">
+              <div className="gesture-capsule pinch-gesture">
+                <FaHandPaper className="gesture-icon hand-pinch-1" />
+              </div>
+              <div className="gesture-capsule">
+                <HiArrowSmRight className="gesture-arrow" />
+              </div>
+              <div className="gesture-capsule pinch-gesture">
+                <GiHandOk className="gesture-icon hand-pinch-2" />
+              </div>
+            </div>
+            <div className="control-desc">Pinch fingers together</div>
           </div>
         </div>
 

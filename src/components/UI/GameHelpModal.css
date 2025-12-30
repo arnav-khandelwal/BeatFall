@@ -1,0 +1,258 @@
+/* Game Help Modal */
+.help-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.85);
+  backdrop-filter: blur(8px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 10000;
+  animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.help-modal-content {
+  background: radial-gradient(circle at top, rgba(30, 20, 10, 0.98), rgba(8, 4, 2, 0.96));
+  border: 2px solid rgba(255, 224, 160, 0.9);
+  border-radius: 20px;
+  padding: 30px;
+  max-width: 600px;
+  max-height: 85vh;
+  overflow-y: auto;
+  position: relative;
+  box-shadow:
+    0 28px 60px rgba(0, 0, 0, 0.95),
+    0 0 32px rgba(255, 255, 255, 0.05),
+    0 0 32px rgba(255, 120, 120, 0.2),
+    0 0 36px rgba(120, 255, 170, 0.18),
+    inset 0 4px 24px rgba(255, 255, 255, 0.15),
+    inset 0 -6px 28px rgba(0, 0, 0, 0.7);
+  animation: slideUp 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes slideUp {
+  from {
+    transform: translateY(30px) scale(0.95);
+    opacity: 0;
+  }
+  to {
+    transform: translateY(0) scale(1);
+    opacity: 1;
+  }
+}
+
+.help-modal-close {
+  position: absolute;
+  top: 15px;
+  right: 15px;
+  background: rgba(255, 0, 0, 0.2);
+  border: 2px solid #c41e3a;
+  color: #c41e3a;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 24px;
+  transition: all 0.3s ease;
+}
+
+.help-modal-close:hover {
+  background: #c41e3a;
+  color: white;
+  transform: rotate(90deg);
+}
+
+.help-modal-title {
+  color: #ffcc00;
+  font-size: 2rem;
+  font-weight: 900;
+  text-align: center;
+  margin: 0 0 25px 0;
+  text-shadow: 0 0 20px rgba(255, 204, 0, 0.6);
+  letter-spacing: 2px;
+}
+
+.help-section {
+  margin-bottom: 25px;
+  padding: 15px;
+  background: rgba(20, 30, 40, 0.6);
+  border: 1px solid rgba(255, 220, 150, 0.3);
+  border-radius: 12px;
+}
+
+.help-section-title {
+  color: #ffcc00;
+  font-size: 1.2rem;
+  font-weight: 800;
+  margin: 0 0 15px 0;
+  text-shadow: 0 0 8px rgba(255, 204, 0, 0.4);
+  letter-spacing: 1px;
+}
+
+.help-control-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 15px;
+  padding: 10px;
+  background: rgba(30, 45, 60, 0.4);
+  border-radius: 8px;
+}
+
+.help-control-item:last-child {
+  margin-bottom: 0;
+}
+
+.help-control-icon-group {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 100px;
+  justify-content: center;
+}
+
+.help-icon {
+  font-size: 1.8rem;
+  color: rgba(255, 255, 255, 0.9);
+  filter: drop-shadow(0 0 4px rgba(255, 255, 255, 0.3));
+}
+
+.help-arrow {
+  font-size: 1.4rem;
+  color: rgba(100, 200, 255, 0.7);
+  filter: drop-shadow(0 0 4px rgba(100, 200, 255, 0.4));
+}
+
+.help-control-text {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.95rem;
+  line-height: 1.5;
+}
+
+.help-control-text strong {
+  color: #ffcc00;
+  display: block;
+  margin-bottom: 3px;
+}
+
+.help-enemy-item {
+  display: flex;
+  align-items: center;
+  gap: 15px;
+  margin-bottom: 12px;
+  padding: 10px;
+  background: rgba(30, 45, 60, 0.4);
+  border-radius: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.help-enemy-item:last-child {
+  margin-bottom: 0;
+}
+
+.help-enemy-badge {
+  font-size: 2.5rem;
+  width: 60px;
+  height: 60px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 12px;
+  border: 2px solid;
+  flex-shrink: 0;
+}
+
+.help-enemy-badge.gremlin {
+  background: rgba(196, 30, 58, 0.2);
+  border-color: #c41e3a;
+  box-shadow: 0 0 15px rgba(196, 30, 58, 0.3);
+}
+
+.help-enemy-badge.ghost {
+  background: rgba(138, 43, 226, 0.2);
+  border-color: #8a2be2;
+  box-shadow: 0 0 15px rgba(138, 43, 226, 0.3);
+}
+
+.help-enemy-badge.krampus {
+  background: rgba(255, 140, 0, 0.2);
+  border-color: #ff8c00;
+  box-shadow: 0 0 15px rgba(255, 140, 0, 0.3);
+}
+
+.help-enemy-badge.boss {
+  background: rgba(220, 20, 60, 0.2);
+  border-color: #dc143c;
+  box-shadow: 0 0 20px rgba(220, 20, 60, 0.4);
+  animation: boss-pulse 2s ease-in-out infinite;
+}
+
+@keyframes boss-pulse {
+  0%, 100% {
+    box-shadow: 0 0 20px rgba(220, 20, 60, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(220, 20, 60, 0.6);
+  }
+}
+
+.help-enemy-details {
+  flex: 1;
+}
+
+.help-enemy-details strong {
+  color: #ffcc00;
+  font-size: 1.1rem;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.help-enemy-details p {
+  margin: 3px 0;
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 0.9rem;
+}
+
+.help-enemy-desc {
+  color: rgba(255, 255, 255, 0.6) !important;
+  font-style: italic;
+  font-size: 0.85rem !important;
+}
+
+.help-objective-text {
+  color: rgba(255, 255, 255, 0.85);
+  font-size: 1rem;
+  line-height: 1.8;
+  margin: 0;
+}
+
+/* Custom scrollbar */
+.help-modal-content::-webkit-scrollbar {
+  width: 8px;
+}
+
+.help-modal-content::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+  border-radius: 4px;
+}
+
+.help-modal-content::-webkit-scrollbar-thumb {
+  background: rgba(255, 204, 0, 0.5);
+  border-radius: 4px;
+}
+
+.help-modal-content::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 204, 0, 0.7);
+}

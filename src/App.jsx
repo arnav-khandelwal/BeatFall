@@ -1,5 +1,5 @@
 import { useState, useRef, useCallback, useEffect } from "react";
-import { IoMusicalNotes, IoStop, IoHome } from "react-icons/io5";
+import { IoMusicalNotes, IoHome, IoHelpCircle } from "react-icons/io5";
 import { useHandInput } from "./hooks/useHandInput";
 import { useAudioAnalyzer } from "./hooks/useAudioAnalyzer";
 import { useEnemies } from "./hooks/useEnemies";
@@ -14,6 +14,7 @@ import HealthBar from "./world/UserHealthBar";
 import { FaSnowflake } from "react-icons/fa";
 import { updateUserProgress } from "./firebase/customAuth";
 import "./components/UI/landingPage.css"
+import GameHelpModal from "./components/UI/GameHelpModal";
 export default function App({ showSongSelector: externalShowSongSelector, setShowSongSelector: externalSetShowSongSelector, onSongSelected, onMainMenu, isGameActive, landingPageMusicControl }) {
   const MAX_PLAYER_HEALTH = 500
   const [playerHp, setPlayerHp] = useState(MAX_PLAYER_HEALTH); /*user's health */
@@ -24,6 +25,7 @@ export default function App({ showSongSelector: externalShowSongSelector, setSho
   const [score, setScore] = useState(0);
   const [userBestScore, setUserBestScore] = useState(null);
   const [isNewHighScore, setIsNewHighScore] = useState(false);
+  const [showHelpModal, setShowHelpModal] = useState(false);
 
   // Use external control if provided, otherwise use internal state
   const showSongSelector = externalShowSongSelector !== undefined ? externalShowSongSelector : internalShowSongSelector;
@@ -330,49 +332,46 @@ export default function App({ showSongSelector: externalShowSongSelector, setSho
           <IoMusicalNotes />
         </button>
 
-        {/* Stop button - only show when song is selected */}
-        {selectedSong && (
-          <button
-            onClick={handleStop}
-            style={{
-              padding: "10px 16px",
-              fontSize: "20px",
-              background: "rgba(22, 91, 51, 0.12)",
-              color: "#165b33",
-              border: "2px solid #165b33",
-              borderRadius: "10px",
-              cursor: "pointer",
-              fontWeight: "bold",
-              boxShadow: "0 4px 12px rgba(22, 91, 51, 0.15)",
-              transition: "all 0.3s ease",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              gap: "6px",
-            }}
-            onMouseEnter={(e) => {
-              e.currentTarget.style.background = "#165b33";
-              e.currentTarget.style.color = "#fff";
-              e.currentTarget.style.boxShadow = "0 6px 20px rgba(22, 91, 51, 0.25)";
-              e.currentTarget.style.transform = "translateY(-2px)";
-            }}
-            onMouseLeave={(e) => {
-              e.currentTarget.style.background = "rgba(22, 91, 51, 0.12)";
-              e.currentTarget.style.color = "#165b33";
-              e.currentTarget.style.boxShadow = "0 4px 12px rgba(22, 91, 51, 0.15)";
-              e.currentTarget.style.transform = "translateY(0)";
-            }}
-          >
-            <IoStop />
-          </button>
-        )}
+        {/* Help Button */}
+        <button
+          onClick={() => setShowHelpModal(true)}
+          style={{
+            padding: "12px 18px",
+            fontSize: "24px",
+            background: "rgba(30, 144, 255, 0.12)",
+            color: "#1e90ff",
+            border: "2px solid #1e90ff",
+            borderRadius: "12px",
+            cursor: "pointer",
+            fontWeight: "bold",
+            boxShadow: "0 4px 12px rgba(30, 144, 255, 0.15)",
+            transition: "all 0.3s ease",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "#1e90ff";
+            e.currentTarget.style.color = "#fff";
+            e.currentTarget.style.transform = "translateY(-2px)";
+            e.currentTarget.style.boxShadow = "0 6px 20px rgba(30, 144, 255, 0.25)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "rgba(30, 144, 255, 0.12)";
+            e.currentTarget.style.color = "#1e90ff";
+            e.currentTarget.style.transform = "translateY(0)";
+            e.currentTarget.style.boxShadow = "0 4px 12px rgba(30, 144, 255, 0.15)";
+          }}
+        >
+          <IoHelpCircle />
+        </button>
       </div>
 
       {/* Audio debug info */}
       {selectedSong && (
         <div style={{
           position: "fixed",
-          top: 130,
+          top: 200,
           right: 10,
           color: "#1a1a1a",
           fontSize: "12px",
@@ -529,6 +528,11 @@ export default function App({ showSongSelector: externalShowSongSelector, setSho
             Main Menu
           </button>
         </div>
+      )}
+
+      {/* Game Help Modal */}
+      {showHelpModal && (
+        <GameHelpModal onClose={() => setShowHelpModal(false)} />
       )}
     </>
   );
