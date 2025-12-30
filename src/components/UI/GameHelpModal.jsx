@@ -57,8 +57,8 @@ export default function GameHelpModal({ onClose }) {
               <img src={gremlinImg} alt="Gremlin" className="help-enemy-img" />
             </div>
             <div className="help-enemy-details">
-              <strong>Gremlin</strong>
-              <p>Damage: 10 HP | Shots to kill: 1</p>
+              <strong>Ghost</strong>
+              <p>Damage: 5 HP | Shots to kill: 1</p>
               <p className="help-enemy-desc">Basic enemy, easy to defeat</p>
             </div>
           </div>
@@ -68,8 +68,8 @@ export default function GameHelpModal({ onClose }) {
               <img src={ghostImg} alt="Ghost" className="help-enemy-img" />
             </div>
             <div className="help-enemy-details">
-              <strong>Ghost</strong>
-              <p>Damage: 5 HP | Shots to kill: 1</p>
+              <strong>Gremlin</strong>
+              <p>Damage: 10 HP | Shots to kill: 2</p>
               <p className="help-enemy-desc">Fast but weak</p>
             </div>
           </div>
