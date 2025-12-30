@@ -12,11 +12,11 @@ import Minimap from "./components/UI/Minimap";
 import "./components/UI/ScopeOverlay.css";
 import HealthBar from "./world/UserHealthBar";
 import { FaSnowflake } from "react-icons/fa";
-export default function App({ showSongSelector: externalShowSongSelector, setShowSongSelector: externalSetShowSongSelector, onSongSelected, onMainMenu, isGameActive, landingPageMusicControl  }) {
-  const MAX_PLAYER_HEALTH=500
+import "./components/UI/landingPage.css"
+export default function App({ showSongSelector: externalShowSongSelector, setShowSongSelector: externalSetShowSongSelector, onSongSelected, onMainMenu, isGameActive, landingPageMusicControl }) {
+  const MAX_PLAYER_HEALTH = 500
   const [playerHp, setPlayerHp] = useState(MAX_PLAYER_HEALTH); /*user's health */
   const [gameOver, setGameOver] = useState(false);
-
   const [hand, setHand] = useState({ active: false });
   const [internalShowSongSelector, setInternalShowSongSelector] = useState(false);
   const [selectedSong, setSelectedSong] = useState(null);
@@ -60,21 +60,21 @@ export default function App({ showSongSelector: externalShowSongSelector, setSho
   }, []);
 
   const handlePlayerDamage = useCallback((enemy) => {
-  const DAMAGE_MAP = {
-    krampus: 20,
-    gremlin: 10,
-    ghostImg: 5,
-    BOSS: 50
-  };
+    const DAMAGE_MAP = {
+      krampus: 20,
+      gremlin: 10,
+      ghostImg: 5,
+      BOSS: 50
+    };
 
-  const DAMAGE = DAMAGE_MAP[enemy.type] ?? 10;
+    const DAMAGE = DAMAGE_MAP[enemy.type] ?? 10;
 
-  setPlayerHp(prev => {
-    const nextHp = Math.max(0, prev - DAMAGE);
-    if (nextHp === 0) setGameOver(true);
-    return nextHp;
-  });
-}, []);
+    setPlayerHp(prev => {
+      const nextHp = Math.max(0, prev - DAMAGE);
+      if (nextHp === 0) setGameOver(true);
+      return nextHp;
+    });
+  }, []);
 
 
   // Enemy spawning system with strong pulse callback
@@ -112,11 +112,11 @@ export default function App({ showSongSelector: externalShowSongSelector, setSho
     }
   };
 
-useEffect(() => {
-  if (gameOver && audio?.isPlaying) {
-    audio.pause();
-  }
-}, [gameOver, audio]);
+  useEffect(() => {
+    if (gameOver && audio?.isPlaying) {
+      audio.pause();
+    }
+  }, [gameOver, audio]);
 
 
   return (
@@ -315,49 +315,60 @@ useEffect(() => {
       <Minimap enemies={enemies} hand={activeHand} />
 
       {gameOver && (
-  <div style={{
-    position: "fixed",
-    inset: 0,
-    background: "rgba(0,0,0,0.85)",
-    zIndex: 99999,
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-    justifyContent: "center",
-    color: "white",
-    fontFamily: "monospace"
-  }}>
-    <h1 style={{ fontSize: "64px", marginBottom: "20px" }}>
-      <span style={{ marginRight: "58px" }}>GAME</span>
-<span>
-       VER
-        <FaSnowflake className="decoration-berry glow-snowflake" size={50} style={{
-      position: "relative",
-      left: "-155px",
-      bottom:"-1px"
-    }}></FaSnowflake>
-</span>
-    </h1>
+        <div style={{
+          position: "fixed",
+          inset: 0,
+          background: "rgba(0,0,0,0.85)",
+          zIndex: 99999,
+          display: "flex",
+          flexDirection: "column",
+          alignItems: "center",
+          justifyContent: "center",
+          color: "white",
+          fontFamily: "monospace"
+        }}>
+          <h1 className="game-logo"
+            style={{
+              fontSize: "64px",
+              marginBottom: "20px",
+              display: "flex",
+              alignItems: "center",
+              gap: "16px",
+              letterSpacing: "4px",
+            }}
+          >
+            <span>GAME</span>
 
-    <p style={{ fontSize: "24px", marginBottom: "30px" }}>
-      Final Score: {score}
-    </p>
-    <button
-      onClick={() => window.location.reload()}
-      style={{
-        padding: "12px 20px",
-        fontSize: "18px",
-        cursor: "pointer",
-        borderRadius: "8px",
-        border: "none",
-        background: "#ff3333",
-        color: "white"
-      }}
-    >
-      Restart
-    </button>
-  </div>
-)}
+            <span style={{ display: "flex", alignItems: "center", gap: "6px" }}>
+              <FaSnowflake
+                size={54}
+                className="decoration-berry glow-snowflake"
+                style={{ transform: "translateY(-4px) translateX(6px)" }}
+              />
+              <span>VER</span>
+            </span>
+          </h1>
+
+          <p className="game-logo" style={{ fontSize: "24px", marginBottom: "30px" }}>
+            Final Score: {score}
+          </p>
+
+          <button className="mode-button"
+            onClick={() => window.location.reload()}
+            style={{
+              padding: "12px 20px",
+              fontSize: "18px",
+              cursor: "pointer",
+              borderRadius: "8px",
+              border: "none",
+              background: "rgba(234, 20, 20, 0.6)",
+              color: "white",
+            }}
+          >
+            Restart
+          </button>
+        </div>
+      )}
     </>
   );
 }
